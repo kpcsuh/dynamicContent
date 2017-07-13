@@ -1,0 +1,2323 @@
+<html>
+<head>
+  <script type = "text/javascript" src = "./assets/static/js/dojotoolkit/dojo/dojo.js"> </script>
+  <script type = "text/javascript">
+  dojo.registerModulePath('BUNDLE','./assets/static/js/bundle');
+    dojo.require("dojo.parser");
+    dojo.require("dijit.form.Form");
+    dojo.require("dijit.layout.TabContainer");
+    dojo.require("dijit.layout.ContentPane");
+    dojo.require("dijit.form.ValidationTextBox");
+    dojo.require("dijit.form.DateTextBox");
+    dojo.require("dijit.form.Select");
+  dojo.require("dijit.form.NumberTextBox");
+
+    // Added for WRMT3
+    dojo.require("dijit.Dialog");
+    dojo.require("dijit.TitlePane");
+    dojo.require("dijit.form.Textarea");
+    dojo.require("dijit.Tooltip");
+
+    dojo.require("dijit.form.CheckBox");  // FIXME: Only needed for CELF Meta; need to find a way to load these in bundle
+    dojo.require("dijit.form.RadioButton"); // FIXME: Only needed for CELF Meta; need to find a way to load these in bundle
+
+  // Custom module for common Bundle HTML functionality.
+  dojo.require("BUNDLE");
+
+  </script>
+</head>
+
+<style type="text/css">
+.dijitTooltip {
+  max-width: 450px;
+}
+.globalFont {
+  font-family: arial;
+  font-size: 12px;
+}
+.dijitTextBox {
+  width: 50px;
+}
+.label {
+  color: #808080;
+  font-weight: bold;
+}
+.header {
+  line-height: 20pt;
+}
+.empty-row {
+  height: 10px;
+}
+.outertbl {
+  border: 1px solid lightgray;
+}
+.padded-td td {
+  padding: .125em;
+}
+.centerResponses input[type="text"] {
+  text-align: center;
+}
+.responseLabel {
+  display: none;
+  position: absolute;
+  background-color: #e5eecc;
+  z-index: 1;
+}
+.disabledFormLabel, .disabledFormLabel span {
+  color: #A4A4A4 !important;
+}
+</style>
+
+<script type="text/javascript">
+// Object to hold 16PF's global variables
+var ASSESSMENT = {
+  "STATE" : {
+    "engineType" : "",
+    "requiredFields" : false
+  }
+};
+
+function validateBundleForm() {
+  //Add in one call per section and demographic section
+  //verify dojo items using dojo
+  var formWidget = dijit.byId('myform');
+  var valid = false;
+  try {
+    valid = formWidget.validate();
+  } catch (err) {
+    console.log(err);
+  }
+  //Add in one call per tab as needed
+  colorize('demoTab');
+  colorize('irTab');
+  return valid;
+}
+
+function colorize(pane) {
+  var widgets = dijit.byId(pane).getChildren();
+  var colorize = false;
+  var i = 0;
+  while (colorize == false && i < widgets.length) {
+    if (widgets[i].state == "Error" || widgets[i].state == "Incomplete") {
+      colorize = true;
+    }
+    i++;
+  }
+  if (colorize) {
+    dojo.style(dojo.byId('tabContainer_tablist_' + pane), "backgroundColor", "#F9F7BA");
+  } else {
+    dojo.style(dojo.byId('tabContainer_tablist_' + pane), "backgroundColor", "");
+  }
+}
+
+function onFormLoad(input) {
+  dojo.connect(dojo.byId("irTab"), "onkeyup", screenAutoAdvance);
+}
+
+function onPlatformChange(platformValues) {
+  // console.log(platformValues);
+  autoAdvance = platformValues.autoAdvance;
+
+  if (platformValues.status == "Ready for Administration" || platformValues.status == "In Progress") {
+    var disable = true;
+    if (platformValues.deliveryType == "OSA" || platformValues.deliveryType == "ROSA") {
+      disable = true;
+    } else {
+      disable = false;
+    }
+
+    var widgets = dojo.query("[widgetId][class~=dijitTextBox]", dijit.byId('irTab').domNode).map(dijit.byNode);
+    for (i = 0; i < widgets.length; i++) {
+      widgets[i].set("disabled", disable);
+    }
+
+    (dojo.byId("showItemText")).disabled = disable;
+  }
+
+  // If the engine type has changed
+  if (ASSESSMENT.STATE.engineType !== platformValues.scoringEngine) {
+    ASSESSMENT.STATE.engineType = platformValues.scoringEngine;
+    setScoringEngineState();
+  }
+
+  updateUI();
+}
+
+function saveAssessmentBundle() {
+}
+
+function updateUI() {
+}
+
+function setScoringEngineState() {
+  var tabContainer = dijit.byId("tabContainer");
+
+  // console.log("setScoringEngineState");
+  // console.log(ASSESSMENT.STATE.engineType);
+
+  if (ASSESSMENT.STATE.engineType == "IPAT") {
+    dojo.byId("Demographic.Norm").value = 2; // Set to combined-gender for IPAT
+    ASSESSMENT.STATE.requiredFields = false;
+    dojo.style(dijit.byId("demoTab").controlButton.domNode,{display:"none"});
+    if (!irTab.selected) {
+      tabContainer.selectChild(dijit.byId("irTab"));
+    }
+  }
+  else {
+    ASSESSMENT.STATE.requiredFields = false;
+    dojo.style(dijit.byId("demoTab").controlButton.domNode,{display:"inline-block"});
+  }
+
+  setRequiredState();
+}
+
+function setRequiredState() {
+  var regExStr = "",
+      currDijit;
+
+  if (ASSESSMENT.STATE.requiredFields) {
+    regExStr = "1|2|3";
+  }
+  else {
+    regExStr = "1|2|3| ";
+  }
+
+  dojo.query(".dijitInputInner", dojo.byId("irTab")).forEach(function(field) {
+    currDijit = dijit.byId(field.getAttribute("id"));
+
+    currDijit.required = ASSESSMENT.STATE.requiredFields;
+    currDijit.regExp = regExStr;
+  });
+}
+
+function doInitialFocus() {
+  if (dijit.byId("demoTab").selected) {
+    if (!dojo.isMoz) {}
+  } else if (dijit.byId("irTab").selected) {}
+}
+
+var inputArr = new Array();
+
+function EnterIncrement(event) {
+  var charCode;
+  if (window.event) {
+    charCode = window.event.keyCode;
+  } else {
+    charCode = event.which;
+  }
+  if (inputArr.length === 0) {
+    inputArr = dojo.query("[type=text], [type=radio]");
+    var tempArr = new Array();
+    var tempPs = 0;
+    for (x = 0; x < inputArr.length; x++) {
+      tempArr[tempPs] = inputArr[x];
+      tempPs++;
+    }
+    inputArr = new Array();
+    for (i = 0; i < tempArr.length; i++) { //Sort by tab index, index is unique so no real checks needed just 2 arrays
+      inputArr[tempArr[i].tabIndex] = tempArr[i];
+    }
+    //Add handcoded special navigation instructions here
+  }
+  if (charCode == 13) {
+    var nodeCalling = dojo.byId(event.target);
+    var index = nodeCalling.tabIndex + 1; //index value to look for
+    var nextNode = inputArr[index];
+    if (nextNode == undefined) {
+      return;
+    }
+    if (nextNode.type == "radio") {
+      dojo.byId(nextNode).focus();
+    } else {
+      var ti = nextNode.tabIndex;
+      if ((ti == 4 || ti == 39) && dijit.byId(nextNode.id).domNode.style.display == "none") {
+        dojo.byId(inputArr[index + 1]).focus();
+        //Add special navigation handlers here
+      } else {
+        dojo.byId(nextNode).focus();
+      }
+    }
+    if (window.event) { // for IE
+      event.keyCode = '';
+    }
+    return false;
+  }
+}
+
+function initializeVerification() {
+  //clear irTab values
+  var textboxes = dojo.query("#irTab [type=text]");
+  for (i = 0; i < textboxes.length; i++) {
+    var revNode = dojo.byId(textboxes[i]);
+    revNode.value = "";
+  } //End For loop
+  var nodeCheckbox = dojo.query("#irTab [type=checkbox]");
+  for (x = 0; x < nodeCheckbox.length; x++) {
+    var revNode2 = dojo.byId(nodeCheckbox[x]);
+    revNode2.value = 0;
+    revNode2.checked = false;
+  }
+
+  dijit.byId("tabContainer").selectChild("irTab");
+  //Show Item Text checkbox will always be at the top of the ItemEntry tab
+  dijit.scrollIntoView(dojo.byId("showItemText"));
+}
+
+function verifyHighlight(vals) {
+  for (v = 0; v < vals.length; v++) {
+    try {
+      if (dojo.byId(vals[v]).type === "text") {
+        dojo.byId(vals[v]).value = "";
+        dijit.byId(vals[v]).required = true;
+        dijit.byId(vals[v]).validate();
+      } else if (dojo.byId(vals[v]).type === "select-one") {
+        dojo.byId(vals[v]).selectedIndex = 0;
+        dojo.byId(vals[v]).require = "true";
+      }
+    } catch (errormsg) {}
+  } //end for loop
+  colorize('irTab');
+}
+
+function InitializeForm() {
+  while (dijit.byId("tabContainer").selectedChildWidget.id != "demoTab") {
+    dijit.byId("tabContainer").back();
+  }
+}
+
+var currentTooltip = null;
+
+function showText(input) {
+  if (dojo.byId("showItemText").checked) {
+    currentTooltip = new dijit.Tooltip({
+      connectId: [dojo.byId(input).id],
+      label: dojo.byId(dojo.byId(input).id + "A").innerHTML,
+      showDelay: 0
+    });
+    currentTooltip.open();
+  } else {
+    hideText(input);
+  }
+}
+
+function hideText(input) {
+  if (currentTooltip != null) {
+    currentTooltip.close();
+    currentTooltip.removeTarget(dojo.byId(input));
+  }
+}
+
+function autoAdvanceFocus(input) {
+  var value = dojo.byId(input).value;
+  var len = dojo.byId(input).readAttribute('maxLength');
+  if (autoAdvance == "yes" && value.length == len) {
+    selectNextItem(input, 1);
+  }
+}
+
+// Move the focus and selection to the next or previous item relative to the input.
+function selectNextItem(input, increment) {
+  var nextItem = getItemAtIncrement(input, increment);
+  if (nextItem != null) {
+    insertOmit(input);
+    nextItem.focus();
+    nextItem.select();
+  }
+}
+
+function getItemAtIncrement(input, increment) {
+  var id = dojo.byId(input).id;
+  var idPrefix = "Response.Q";
+  var idSuffix = id.substr(id.length - 1);
+  var item = input;
+  if (id.substr(0, 10) === idPrefix) {
+    var questionNum = id.substr(10, id.length - 11).valueOf();
+    item = dojo.byId(idPrefix + (questionNum * 1 + increment) + idSuffix);
+  }
+  return item;
+}
+
+// Insert omit if the response is empty.  The user skipped/omitted the response.
+// Insert the hyphen to indicate an omitted response for Q Local scoring.
+function insertOmit(input) {
+  // console.log("inserOmit: update");
+  var respField = dojo.byId(input);
+
+  if (respField.value.length == 0) {
+    respField.value = "";
+  }
+}
+
+// Prevent certain character codes from triggering auto-advance
+function screenAutoAdvance(event) {
+  var charCode;
+  var eventTargetId = null;
+  var shiftKey = false;
+  var increment = 0;
+  if (window.event) {
+    charCode = window.event.keyCode; // IE
+    eventTargetId = window.event.srcElement.id; // IE
+    shiftKey = window.event.shiftKey; // IE
+  } else {
+    charCode = event.which; // Firefox
+    eventTargetId = event.originalTarget.readAttribute('id'); // Firefox
+    shiftKey = event.shiftKey; // Firefox
+  }
+  // Handle up and down arrow keys
+  if (charCode == 0x26) {
+    selectNextItem(eventTargetId, -1);
+    return;
+  }
+  if (charCode == 0x28) {
+    selectNextItem(eventTargetId, 1);
+    return;
+  }
+  // Handle the tab key separately.  The browser moves the cursor before
+  // we get here so we have to adjust the id to omit the right field.
+  if (charCode == 0x09) {
+    increment = shiftKey ? 1 : -1;
+    insertOmit(getItemAtIncrement(eventTargetId, increment));
+  }
+  // The return key
+  if (charCode == 0x0d) {
+    insertOmit(getItemAtIncrement(eventTargetId, -1));
+  }
+  if (charCode < 0x20 ||
+    (charCode > 0x20 && charCode < 0x30) ||
+    (charCode > 0x5a && charCode < 0x60) ||
+    (charCode > 0x6f && charCode < 0xad) ||
+    (charCode > 0xad && charCode < 0xba) ||
+    (charCode > 0xde)) {
+    return;
+  }
+  autoAdvanceFocus(eventTargetId);
+}
+
+function updateOSAParameters() {
+  var includeCCR = dojo.byId("includeCCR");
+  var couplesReport = dojo.byId("Demographic.CouplesReport").value;
+
+  if (couplesReport == 1) {
+    includeCCR.value = "true";
+  } else {
+    includeCCR.value = "false";
+  }
+}
+</script>
+
+
+<!-- ------- *** HTML Generated on 8/22/2012 7:07:38 PM*** ------- -->
+
+<form class="raw-scores-form item-entry-form globalFont padded-td" dojotype="dijit.form.Form" id="myform" onkeypress="EnterIncrement">
+
+  <!-- The following three input elements are needed to make verification work -->
+  <input type="hidden" name="verifyStart" />
+  <input type="hidden" name="SectionAll" id="SectionAll" value="N" />
+  <input type="hidden" name="verifyEnd" />
+
+  <input name="osaParamStart" style="display: none" />
+  <input name="includeCCR" id="includeCCR" value="false" style="display: none" />
+  <input name="osaParamEnd" style="display: none" />
+
+  <!-- TAB set div -->
+  <div dojotype="dijit.layout.TabContainer" style="width: 100%;" doLayout=false id="tabContainer">
+    <!-- DEMOGRAPHICS TAB -->
+    <div dojotype="dijit.layout.ContentPane" title="Demographics" onshow="doInitialFocus()" id="demoTab" style="height: 450px;">
+
+      <!-- *** Demographic Set - Admin *** -->
+      <table style="text-align: left; width: 100%;" border="0" cellpadding="1" cellspacing="5">
+        <tr>
+          <td align="left" style="width: 30%"><b>Administrator</b>
+          </td>
+          <td></td>
+        </tr>
+        <!-- *** Question #1 of 2 - Norm Group *** -->
+        <tr>
+          <td align="right" style="width: 30%">Norm Group</td>
+          <td>
+            <select style="width: auto;" id="Demographic.Norm" name="Demographic.Norm" tabindex="10" require="true" onchange="removeRequire(this);">
+              <option value="">Please Select...</option>
+              <option value="1">Gender-Specific Norms</option>
+              <option value="2">Combined-Gender Norms</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <!-- Item Entry TAB -->
+    <div dojotype="dijit.layout.ContentPane" class="centerResponses" title="Item Entry" onshow="doInitialFocus()" id="irTab">
+      <div style="padding-top: 5px; padding-bottom: 5px;">
+        <input type="hidden" name="itemResponsesExists" id="itemResponsesExists" value=true>
+        <input type="hidden" name="tabChoice" id="tabChoice" value="irTab">
+        <input type="checkbox" name="showItemText" id="showItemText" tabindex="12">
+        <label>Show Item Text</label>
+      </div>
+
+      <!-- *** NOTE the id attributes of the item <input> elements have been hand edited to make the autoAdvanceFocus method work.  Response.Q1A
+     through Response.Q186A had the trailing A removed, and Response.Q1B through Response.Q26B had the trailing B removed and had
+     the numerical part changed so that Response.Q1B became Response.Q187.  This was to satisfy the assumptions in autoAdvanceFocus
+     that there was no trailing characters after the numerical part and that the numerical parts were always monotonically
+     increasing by one.
+     *** -->
+      <!-- *** NOTE the id attributes of the item response label elements have been hand edited to make the showText method work.  The id of the
+   input element is used to derive the id of the element holding the item text.  So if the id of the input element is Response.Q186,
+   then the id of the element holding the item text has to be Response.Q186A.
+     *** -->
+
+      <!-- *** Subtest - All *** -->
+      <table style="vertical-align:text-top;">
+
+        <!-- *** Question #1 of 211 - I'd enjoy more being a counselor than being an architect. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">1.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q1A" name="Response.Q1A" tabindex="13" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q1AA"> I'd enjoy more being a counselor than being an architect.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #2 of 211 - When something upsets me, I usually get over it quite soon. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">2.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q2A" name="Response.Q2A" tabindex="14" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q2AA"> When something upsets me, I usually get over it quite soon.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #3 of 211 - When people do something that bothers me, I usually: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">3.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q3A" name="Response.Q3A" tabindex="15" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q3AA"> When people do something that bothers me, I usually:
+            <br/>1 = let it go;, 2 = ?, 3 = mention it to them.</td>
+        </tr>
+
+        <!-- *** Question #4 of 211 - I believe more in: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">4.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q4A" name="Response.Q4A" tabindex="16" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q4AA"> I believe more in:
+            <br/>1 = being properly serious in everyday life;, 2 = ?, 3 = the saying "laugh and be merry" most of the time.</td>
+        </tr>
+
+        <!-- *** Question #5 of 211 - I'd rather see a home that: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">5.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q5A" name="Response.Q5A" tabindex="17" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q5AA"> I'd rather see a home that:
+            <br/>1 = has strict standards of behavior;, 2 = ?, 3 = doesn't have too many rules.</td>
+        </tr>
+
+        <!-- *** Question #6 of 211 - I usually enjoy spending time talking with friends about social events or parties. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">6.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q6A" name="Response.Q6A" tabindex="18" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q6AA"> I usually enjoy spending time talking with friends about social events or parties.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #7 of 211 - I admire more: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">7.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q7A" name="Response.Q7A" tabindex="19" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q7AA"> I admire more:
+            <br/>1 = a person who has average abilities, but strict morals;, 2 = ?, 3 = a person who is very talented, but is sometimes not very responsible.</td>
+        </tr>
+
+        <!-- *** Question #8 of 211 - When I was a child, I spent more free time: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">8.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q8A" name="Response.Q8A" tabindex="20" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q8AA"> When I was a child, I spent more free time:
+            <br/>1 = making or building something;, 2 = ?, 3 = reading or daydreaming.</td>
+        </tr>
+
+        <!-- *** Question #9 of 211 - In joining a new group, I usually seem to fit in right away. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">9.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q9A" name="Response.Q9A" tabindex="21" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q9AA"> In joining a new group, I usually seem to fit in right away.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #10 of 211 - I get excited about good plays or novels. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">10.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q10A" name="Response.Q10A" tabindex="22" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q10AA"> I get excited about good plays or novels.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #11 of 211 - There's usually a big difference between what people say they'll do and what they actually do. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">11.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q11A" name="Response.Q11A" tabindex="23" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q11AA"> There's usually a big difference between what people say they'll do and what they actually do.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #12 of 211 - My friends think I'm slightly absent-minded and not always practical. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">12.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q12A" name="Response.Q12A" tabindex="24" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q12AA"> My friends think I'm slightly absent-minded and not always practical.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #13 of 211 - A lot of people will "stab you in the back" in order to get ahead themselves. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">13.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q13A" name="Response.Q13A" tabindex="25" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q13AA"> A lot of people will "stab you in the back" in order to get ahead themselves.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #14 of 211 - I get into trouble because I sometimes pursue my own ideas without talking them over with the people involved. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">14.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q14A" name="Response.Q14A" tabindex="26" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q14AA"> I get into trouble because I sometimes pursue my own ideas without talking them over with the people involved.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #15 of 211 - I find it easy to talk about my life, even about things that others might consider quite personal. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">15.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q15A" name="Response.Q15A" tabindex="27" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q15AA"> I find it easy to talk about my life, even about things that others might consider quite personal.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #16 of 211 - I am willing to help people. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">16.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q16A" name="Response.Q16A" tabindex="28" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q16AA"> I am willing to help people.
+            <br/>1 = always, 2 = ?, 3 = sometimes</td>
+        </tr>
+
+        <!-- *** Question #17 of 211 - My thoughts are too deep and complicated for many people to understand. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">17.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q17A" name="Response.Q17A" tabindex="29" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q17AA"> My thoughts are too deep and complicated for many people to understand.
+            <br/>1 = hardly ever, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #18 of 211 - I prefer to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">18.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q18A" name="Response.Q18A" tabindex="30" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q18AA"> I prefer to:
+            <br/>1 = talk about my problems with my friends;, 2 = ?, 3 = keep them to myself.</td>
+        </tr>
+
+        <!-- *** Question #19 of 211 - I tend to be too sensitive and worry too much about something I've done. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">19.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q19A" name="Response.Q19A" tabindex="31" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q19AA"> I tend to be too sensitive and worry too much about something I've done.
+            <br/>1 = hardly ever, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #20 of 211 - I'd prefer to deal with people who are: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">20.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q20A" name="Response.Q20A" tabindex="32" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q20AA"> I'd prefer to deal with people who are:
+            <br/>1 = conventional and polite in what they say;, 2 = ?, 3 = direct and speak up about problems they see.</td>
+        </tr>
+
+        <!-- *** Question #21 of 211 - If people act as if they dislike me: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">21.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q21A" name="Response.Q21A" tabindex="33" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q21AA"> If people act as if they dislike me:
+            <br/>1 = it doesn't upset me;, 2 = ?, 3 = I usually feel hurt.</td>
+        </tr>
+
+        <!-- *** Question #22 of 211 - I like to think up better ways of doing things rather than to follow well-tried ways. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">22.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q22A" name="Response.Q22A" tabindex="34" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q22AA"> I like to think up better ways of doing things rather than to follow well-tried ways.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #23 of 211 - I have said things that hurt others' feelings. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">23.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q23A" name="Response.Q23A" tabindex="35" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q23AA"> I have said things that hurt others' feelings.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #24 of 211 - If I had to cook or build something, I'd follow the directions exactly. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">24.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q24A" name="Response.Q24A" tabindex="36" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q24AA"> If I had to cook or build something, I'd follow the directions exactly.
+            <br/>1 = true, why take chances, 2 = ?, 3 = false, I'd probably try to make it more interesting</td>
+        </tr>
+
+        <!-- *** Question #25 of 211 - I like it best when I have people around me. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">25.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q25A" name="Response.Q25A" tabindex="37" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q25AA"> I like it best when I have people around me.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #26 of 211 - I feel that: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">26.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q26A" name="Response.Q26A" tabindex="38" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q26AA"> I feel that:
+            <br/>1 = some jobs just don't have to be done as carefully as others;, 2&nbsp;=&nbsp;?, 3&nbsp;=&nbsp;any job should be done thoroughly if you do it at all.</td>
+        </tr>
+
+        <!-- *** Question #27 of 211 - I usually like to do my planning alone, without interruptions and suggestions from others. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">27.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q27A" name="Response.Q27A" tabindex="39" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q27AA"> I usually like to do my planning alone, without interruptions and suggestions from others.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #28 of 211 - It's hard to be patient when people criticize me. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">28.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q28A" name="Response.Q28A" tabindex="40" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q28AA"> It's hard to be patient when people criticize me.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #29 of 211 - I can be quite comfortable even in a disorganized setting. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">29.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q29A" name="Response.Q29A" tabindex="41" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q29AA"> I can be quite comfortable even in a disorganized setting.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #30 of 211 - If my carefully made plans have to be changed because of other people: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">30.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q30A" name="Response.Q30A" tabindex="42" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q30AA"> If my carefully made plans have to be changed because of other people:
+            <br/>1 = it annoys me;, 2 = ?, 3 = I'm happy to change plans.</td>
+        </tr>
+
+        <!-- *** Question #31 of 211 - I would rather be: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">31.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q31A" name="Response.Q31A" tabindex="43" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q31AA"> I would rather be:
+            <br/>1 = in a business office, organizing and seeing people;, 2 = ?, 3 = an architect, drawing plans in a quiet room.</td>
+        </tr>
+
+        <!-- *** Question #32 of 211 - When one small thing after another goes wrong, I: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">32.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q32A" name="Response.Q32A" tabindex="44" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q32AA"> When one small thing after another goes wrong, I:
+            <br/>1 = feel as though I can't cope;, 2 = ?, 3 = just go on as usual.</td>
+        </tr>
+
+        <!-- *** Question #33 of 211 - I enjoy taking care of other people's needs. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">33.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q33A" name="Response.Q33A" tabindex="45" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q33AA"> I enjoy taking care of other people's needs.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #34 of 211 - I sometimes make foolish remarks in fun, just to surprise people. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">34.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q34A" name="Response.Q34A" tabindex="46" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q34AA"> I sometimes make foolish remarks in fun, just to surprise people.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #35 of 211 - When the time comes for something I have planned and looked forward to, I occasionally do not feel up to going. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">35.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q35A" name="Response.Q35A" tabindex="47" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q35AA"> When the time comes for something I have planned and looked forward to, I occasionally do not feel up to going.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #36 of 211 - In a situation where I'm in charge, I feel comfortable giving people directions. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">36.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q36A" name="Response.Q36A" tabindex="48" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q36AA"> In a situation where I'm in charge, I feel comfortable giving people directions.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #37 of 211 - I'd prefer to spend an evening: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">37.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q37A" name="Response.Q37A" tabindex="49" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q37AA"> I'd prefer to spend an evening:
+            <br/>1 = working on a quiet hobby;, 2 = ?, 3 = at a lively party.</td>
+        </tr>
+
+        <!-- *** Question #38 of 211 - People think of me as more: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">38.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q38A" name="Response.Q38A" tabindex="50" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q38AA"> People think of me as more:
+            <br/>1 = cooperative;, 2 = ?, 3 = assertive.</td>
+        </tr>
+
+        <!-- *** Question #39 of 211 - I greatly enjoy the racy and slapstick humor of some television shows. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">39.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q39A" name="Response.Q39A" tabindex="51" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q39AA"> I greatly enjoy the racy and slapstick humor of some television shows.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #40 of 211 - I value respect for rules and good manners more than easy living. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">40.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q40A" name="Response.Q40A" tabindex="52" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q40AA"> I value respect for rules and good manners more than easy living.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #41 of 211 - I am shy and cautious about making friends with new people. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">41.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q41A" name="Response.Q41A" tabindex="53" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q41AA"> I am shy and cautious about making friends with new people.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #42 of 211 - If I could, I would rather exercise by: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">42.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q42A" name="Response.Q42A" tabindex="54" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q42AA"> If I could, I would rather exercise by:
+            <br/>1 = fencing or dancing;, 2 = ?, 3 = wrestling or baseball.</td>
+        </tr>
+
+        <!-- *** Question #43 of 211 - It's always important to pay attention to other people's motives. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">43.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q43A" name="Response.Q43A" tabindex="55" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q43AA"> It's always important to pay attention to other people's motives.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #44 of 211 - It would be more interesting to be a musician than a mechanic. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">44.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q44A" name="Response.Q44A" tabindex="56" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q44AA"> It would be more interesting to be a musician than a mechanic.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #45 of 211 - People form opinions about me too quickly. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">45.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q45A" name="Response.Q45A" tabindex="57" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q45AA"> People form opinions about me too quickly.
+            <br/>1 = hardly ever, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #46 of 211 - I'm the type of person who: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">46.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q46A" name="Response.Q46A" tabindex="58" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q46AA"> I'm the type of person who:
+            <br/>1 = is always doing practical things that need to be done;, 2&nbsp;=&nbsp;?, 3&nbsp;=&nbsp;daydreams and thinks up things on my own.</td>
+        </tr>
+
+        <!-- *** Question #47 of 211 - Some people think I'm hard to get close to. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">47.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q47A" name="Response.Q47A" tabindex="59" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q47AA"> Some people think I'm hard to get close to.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #48 of 211 - I may deceive people by being friendly when I really dislike them. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">48.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q48A" name="Response.Q48A" tabindex="60" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q48AA"> I may deceive people by being friendly when I really dislike them.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #49 of 211 - My thoughts tend to be about sensible, down-to-earth things. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">49.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q49A" name="Response.Q49A" tabindex="61" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q49AA"> My thoughts tend to be about sensible, down-to-earth things.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #50 of 211 - I tend to be reserved and keep my problems to myself. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">50.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q50A" name="Response.Q50A" tabindex="62" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q50AA"> I tend to be reserved and keep my problems to myself.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #51 of 211 - After I make up my mind about something, I still keep thinking about whether it's right or wrong. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">51.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q51A" name="Response.Q51A" tabindex="63" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q51AA"> After I make up my mind about something, I still keep thinking about whether it's right or wrong.
+            <br/>1 = usually true, 2 = ?, 3 = usually false</td>
+        </tr>
+
+        <!-- *** Question #52 of 211 - I don't really like people who are "different" or unusual. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">52.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q52A" name="Response.Q52A" tabindex="64" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q52AA"> I don't really like people who are "different" or unusual.
+            <br/>1 = true, I usually don't, 2 = ?, 3 = false, I usually find them interesting</td>
+        </tr>
+
+        <!-- *** Question #53 of 211 - I'm more interested in: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">53.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q53A" name="Response.Q53A" tabindex="65" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q53AA"> I'm more interested in:
+            <br/>1 = seeking personal meaning in life;, 2 = ?, 3 = a secure job that pays well.</td>
+        </tr>
+
+        <!-- *** Question #54 of 211 - When people get angry at each other, it usually bothers me more than most people. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">54.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q54A" name="Response.Q54A" tabindex="66" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q54AA"> When people get angry at each other, it usually bothers me more than most people.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #55 of 211 - What this world needs is: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">55.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q55A" name="Response.Q55A" tabindex="67" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q55AA"> What this world needs is:
+            <br/>1 = more steady, solid citizens;, 2 = ?, 3 = more reformers with opinions about how to improve the world.</td>
+        </tr>
+
+        <!-- *** Question #56 of 211 - I prefer games where: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">56.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q56A" name="Response.Q56A" tabindex="68" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q56AA"> I prefer games where:
+            <br/>1 = you're on a team or have a partner;, 2 = ?, 3 = people are on their own.</td>
+        </tr>
+
+        <!-- *** Question #57 of 211 - I usually leave some things to chance rather than make complex plans about every detail. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">57.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q57A" name="Response.Q57A" tabindex="69" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q57AA"> I usually leave some things to chance rather than make complex plans about every detail.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #58 of 211 - I frequently have periods where it's hard to stop a mood of self-pity. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">58.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q58A" name="Response.Q58A" tabindex="70" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q58AA"> I frequently have periods where it's hard to stop a mood of self-pity.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #59 of 211 - The best hours of the day are usually when I'm alone with my own thoughts and projects. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">59.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q59A" name="Response.Q59A" tabindex="71" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q59AA"> The best hours of the day are usually when I'm alone with my own thoughts and projects.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #60 of 211 - If people interrupt me while I'm trying to do something, it doesn't bother me. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">60.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q60A" name="Response.Q60A" tabindex="72" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q60AA"> If people interrupt me while I'm trying to do something, it doesn't bother me.
+            <br/>1 = true, it doesn't, 2 = ?, 3 = false, it does</td>
+        </tr>
+
+        <!-- *** Question #61 of 211 - I always keep my belongings in tip-top shape. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">61.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q61A" name="Response.Q61A" tabindex="73" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q61AA"> I always keep my belongings in tip-top shape.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #62 of 211 - Sometimes I get frustrated with people too quickly. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">62.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q62A" name="Response.Q62A" tabindex="74" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q62AA"> Sometimes I get frustrated with people too quickly.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #63 of 211 - I'm not comfortable talking about or showing my feelings of affection or caring. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">63.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q63A" name="Response.Q63A" tabindex="75" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q63AA"> I'm not comfortable talking about or showing my feelings of affection or caring.
+            <br/>1 = true, I'm not, 2 = ?, 3 = false, I am</td>
+        </tr>
+
+        <!-- *** Question #64 of 211 - In my personal life I reach the goals I set, almost all of the time. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">64.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q64A" name="Response.Q64A" tabindex="76" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q64AA"> In my personal life I reach the goals I set, almost all of the time.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #65 of 211 - If the salary were the same, I'd rather be a scientist than a sales manager. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">65.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q65A" name="Response.Q65A" tabindex="77" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q65AA"> If the salary were the same, I'd rather be a scientist than a sales manager.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #66 of 211 - If people are doing something wrong, I usually tell them what I think. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">66.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q66A" name="Response.Q66A" tabindex="78" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q66AA"> If people are doing something wrong, I usually tell them what I think.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #67 of 211 - I feel that my emotional needs are: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">67.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q67A" name="Response.Q67A" tabindex="79" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q67AA"> I feel that my emotional needs are:
+            <br/>1 = not too satisfied;, 2 = ?, 3 = well satisfied.</td>
+        </tr>
+
+        <!-- *** Question #68 of 211 - I usually like being in the middle of a lot of excitement and activity. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">68.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q68A" name="Response.Q68A" tabindex="80" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q68AA"> I usually like being in the middle of a lot of excitement and activity.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #69 of 211 - People should insist more than they now do that moral standards be strictly followed. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">69.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q69A" name="Response.Q69A" tabindex="81" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q69AA"> People should insist more than they now do that moral standards be strictly followed.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #70 of 211 - I'd rather dress: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">70.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q70A" name="Response.Q70A" tabindex="82" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q70AA"> I'd rather dress:
+            <br/>1 = neatly and quietly;, 2 = ?, 3 = in an eye-catching, stylish way.</td>
+        </tr>
+
+        <!-- *** Question #71 of 211 - I tend to get embarrassed if I suddenly become the center of attention in a social group. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">71.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q71A" name="Response.Q71A" tabindex="83" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q71AA"> I tend to get embarrassed if I suddenly become the center of attention in a social group.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #72 of 211 - I get annoyed when people insist that I follow every single minor safety rule. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">72.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q72A" name="Response.Q72A" tabindex="84" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q72AA"> I get annoyed when people insist that I follow every single minor safety rule.
+            <br/>1 = true, it's not always necessary, 2 = ?, 3 = false, it's important to do things right</td>
+        </tr>
+
+        <!-- *** Question #73 of 211 - Starting conversations with strangers: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">73.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q73A" name="Response.Q73A" tabindex="85" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q73AA"> Starting conversations with strangers:
+            <br/>1 = never gives me any trouble;, 2 = ?, 3 = is hard for me.</td>
+        </tr>
+
+        <!-- *** Question #74 of 211 - If I worked on a newspaper, I'd rather deal with: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">74.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q74A" name="Response.Q74A" tabindex="86" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q74AA"> If I worked on a newspaper, I'd rather deal with:
+            <br/>1 = movie or book reviews;, 2 = ?, 3 = sports or politics.</td>
+        </tr>
+
+        <!-- *** Question #75 of 211 - I let little things upset me more than they should. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">75.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q75A" name="Response.Q75A" tabindex="87" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q75AA"> I let little things upset me more than they should.
+            <br/>1 = sometimes, 2 = ?, 3 = rarely</td>
+        </tr>
+
+        <!-- *** Question #76 of 211 - It's wise to be on guard against smooth talkers because they might take advantage of you. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">76.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q76A" name="Response.Q76A" tabindex="88" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q76AA"> It's wise to be on guard against smooth talkers because they might take advantage of you.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #77 of 211 - I'd rather stop in the street to watch an artist painting than a building being constructed. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">77.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q77A" name="Response.Q77A" tabindex="89" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q77AA"> I'd rather stop in the street to watch an artist painting than a building being constructed.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #78 of 211 - People are lazy on a job if they can get away with it. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">78.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q78A" name="Response.Q78A" tabindex="90" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q78AA"> People are lazy on a job if they can get away with it.
+            <br/>1 = hardly ever, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #79 of 211 - I get new ideas about all sorts of things, too many to put into practice. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">79.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q79A" name="Response.Q79A" tabindex="91" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q79AA"> I get new ideas about all sorts of things, too many to put into practice.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #80 of 211 - In talking to someone new, I don't give out any more information than is necessary. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">80.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q80A" name="Response.Q80A" tabindex="92" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q80AA"> In talking to someone new, I don't give out any more information than is necessary.
+            <br/>1 = usually true, 2 = ?, 3 = usually false</td>
+        </tr>
+
+        <!-- *** Question #81 of 211 - I pay more attention to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">81.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q81A" name="Response.Q81A" tabindex="93" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q81AA"> I pay more attention to:
+            <br/>1 = the practical things around me;, 2 = ?, 3 = thoughts and imagination.</td>
+        </tr>
+
+        <!-- *** Question #82 of 211 - When people criticize me in front of others, I feel very downhearted and hurt. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">82.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q82A" name="Response.Q82A" tabindex="94" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q82AA"> When people criticize me in front of others, I feel very downhearted and hurt.
+            <br/>1 = hardly ever, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #83 of 211 - I find people more interesting if their views are different from most people's. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">83.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q83A" name="Response.Q83A" tabindex="95" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q83AA"> I find people more interesting if their views are different from most people's.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #84 of 211 - In dealing with people it's better to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">84.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q84A" name="Response.Q84A" tabindex="96" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q84AA"> In dealing with people it's better to:
+            <br/>1 = "put all your cards on the table";, 2 = ?, 3 = "play your hand close to your chest."</td>
+        </tr>
+
+        <!-- *** Question #85 of 211 - Sometimes, I would like to get even, rather than forgive and forget. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">85.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q85A" name="Response.Q85A" tabindex="97" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q85AA"> Sometimes, I would like to get even, rather than forgive and forget.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #86 of 211 - I like people who: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">86.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q86A" name="Response.Q86A" tabindex="98" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q86AA"> I like people who:
+            <br/>1 = are stable and conventional in their interests;, 2 = ?, 3 = seriously think through their views about life.</td>
+        </tr>
+
+        <!-- *** Question #87 of 211 - I sometimes feel too responsible for things that happen around me. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">87.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q87A" name="Response.Q87A" tabindex="99" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q87AA"> I sometimes feel too responsible for things that happen around me.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #88 of 211 - Work that is familiar and routine makes me feel: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">88.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q88A" name="Response.Q88A" tabindex="100" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q88AA"> Work that is familiar and routine makes me feel:
+            <br/>1 = bored and sleepy;, 2 = ?, 3 = secure and confident.</td>
+        </tr>
+
+        <!-- *** Question #89 of 211 - I get things done better working alone rather than working with a committee. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">89.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q89A" name="Response.Q89A" tabindex="101" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q89AA"> I get things done better working alone rather than working with a committee.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #90 of 211 - I don't usually mind if my room is messy. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">90.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q90A" name="Response.Q90A" tabindex="102" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q90AA"> I don't usually mind if my room is messy.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #91 of 211 - Even when someone is slow to understand what I'm explaining, it's easy for me to be patient. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">91.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q91A" name="Response.Q91A" tabindex="103" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q91AA"> Even when someone is slow to understand what I'm explaining, it's easy for me to be patient.
+            <br/>1 = true, 2 = ?, 3 = false, it's hard to be patient</td>
+        </tr>
+
+        <!-- *** Question #92 of 211 - I like to join in with people who are doing something together such as going to a park or to a museum. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">92.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q92A" name="Response.Q92A" tabindex="104" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q92AA"> I like to join in with people who are doing something together such as going to a park or to a museum.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #93 of 211 - I'm somewhat of a perfectionist and like to have things done just right. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">93.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q93A" name="Response.Q93A" tabindex="105" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q93AA"> I'm somewhat of a perfectionist and like to have things done just right.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #94 of 211 - When I have to wait in a long line for something, I don't get as restless and fidgety as most people. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">94.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q94A" name="Response.Q94A" tabindex="106" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q94AA"> When I have to wait in a long line for something, I don't get as restless and fidgety as most people.
+            <br/>1 = true, I don't, 2 = ?, 3 = false, I get restless</td>
+        </tr>
+
+        <!-- *** Question #95 of 211 - People treat me less reasonably than my good intentions deserve. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">95.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q95A" name="Response.Q95A" tabindex="107" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q95AA"> People treat me less reasonably than my good intentions deserve.
+            <br/>1 = sometimes, 2 = ?, 3 = never</td>
+        </tr>
+
+        <!-- *** Question #96 of 211 - I enjoy people who show their emotions openly. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">96.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q96A" name="Response.Q96A" tabindex="108" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q96AA"> I enjoy people who show their emotions openly.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #97 of 211 - I don't let myself get depressed over little things. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">97.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q97A" name="Response.Q97A" tabindex="109" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q97AA"> I don't let myself get depressed over little things.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #98 of 211 - In helping with a useful invention, I'd prefer: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">98.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q98A" name="Response.Q98A" tabindex="110" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q98AA"> In helping with a useful invention, I'd prefer:
+            <br/>1 = working on it in a laboratory;, 2 = ?, 3 = showing people how to use it.</td>
+        </tr>
+
+        <!-- *** Question #99 of 211 - If being polite and pleasant doesn't work, I can be tough and sharp if I need to. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">99.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q99A" name="Response.Q99A" tabindex="111" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q99AA"> If being polite and pleasant doesn't work, I can be tough and sharp if I need to.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #100 of 211 - I like to go out to shows or entertainment often. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">100.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q100A" name="Response.Q100A" tabindex="112" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q100AA"> I like to go out to shows or entertainment often.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #101 of 211 - I feel dissatisfied with myself. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">101.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q101A" name="Response.Q101A" tabindex="113" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q101AA"> I feel dissatisfied with myself.
+            <br/>1 = sometimes, 2 = ?, 3 = rarely</td>
+        </tr>
+
+        <!-- *** Question #102 of 211 - If we were lost in a city and my friends didn't agree with me on the best way to go, I'd: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">102.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q102A" name="Response.Q102A" tabindex="114" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q102AA"> If we were lost in a city and my friends didn't agree with me on the best way to go, I'd:
+            <br/>1 = make no fuss and follow them;, 2 = ?, 3 = let them know that I thought my way was best.</td>
+        </tr>
+
+        <!-- *** Question #103 of 211 - People think of me as a happy-go-lucky, carefree person. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">103.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q103A" name="Response.Q103A" tabindex="115" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q103AA"> People think of me as a happy-go-lucky, carefree person.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #104 of 211 - If a bank were careless and didn't charge me for something, I'd feel: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">104.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q104A" name="Response.Q104A" tabindex="116" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q104AA"> If a bank were careless and didn't charge me for something, I'd feel:
+            <br/>1 = I had to point it out and pay;, 2 = ?, 3 = it's not my business to tell them.</td>
+        </tr>
+
+        <!-- *** Question #105 of 211 - I have always had to fight against being too shy. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">105.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q105A" name="Response.Q105A" tabindex="117" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q105AA"> I have always had to fight against being too shy.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #106 of 211 - Teachers, ministers, and others spend too much time trying to stop us from doing what we want to do. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">106.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q106A" name="Response.Q106A" tabindex="118" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q106AA"> Teachers, ministers, and others spend too much time trying to stop us from doing what we want to do.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #107 of 211 - When I'm in a group, I usually sit and listen and let others do most of the talking. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">107.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q107A" name="Response.Q107A" tabindex="119" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q107AA"> When I'm in a group, I usually sit and listen and let others do most of the talking.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #108 of 211 - I'd usually appreciate the beauty of a poem more than an expert football strategy. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">108.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q108A" name="Response.Q108A" tabindex="120" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q108AA"> I'd usually appreciate the beauty of a poem more than an expert football strategy.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #109 of 211 - If people are frank and open, others try to get the better of them. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">109.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q109A" name="Response.Q109A" tabindex="121" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q109AA"> If people are frank and open, others try to get the better of them.
+            <br/>1 = hardly ever, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #110 of 211 - I'm always interested in mechanical things and am pretty good at fixing them. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">110.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q110A" name="Response.Q110A" tabindex="122" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q110AA"> I'm always interested in mechanical things and am pretty good at fixing them.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #111 of 211 - Sometimes I get so lost in my thoughts that, unless I watch out, I misplace things, have small mishaps, or lose track of time. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">111.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q111A" name="Response.Q111A" tabindex="123" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q111AA"> Sometimes I get so lost in my thoughts that, unless I watch out, I misplace things, have small mishaps, or lose track of time.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #112 of 211 - It seems that more than half the people I meet can't really be trusted. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">112.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q112A" name="Response.Q112A" tabindex="124" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q112AA"> It seems that more than half the people I meet can't really be trusted.
+            <br/>1 = true, they can't be trusted, 2 = ?, 3 = false, they can be trusted</td>
+        </tr>
+
+        <!-- *** Question #113 of 211 - I usually find that I know other people better than they know me. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">113.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q113A" name="Response.Q113A" tabindex="125" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q113AA"> I usually find that I know other people better than they know me.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #114 of 211 - People often say that my ideas are realistic and practical. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">114.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q114A" name="Response.Q114A" tabindex="126" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q114AA"> People often say that my ideas are realistic and practical.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #115 of 211 - I make smart, sarcastic remarks to people if I think they deserve it. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">115.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q115A" name="Response.Q115A" tabindex="127" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q115AA"> I make smart, sarcastic remarks to people if I think they deserve it.
+            <br/>1 = sometimes, 2 = ?, 3 = never</td>
+        </tr>
+
+        <!-- *** Question #116 of 211 - Sometimes I feel as if I've done something wrong, even though I really haven't. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">116.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q116A" name="Response.Q116A" tabindex="128" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q116AA"> Sometimes I feel as if I've done something wrong, even though I really haven't.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #117 of 211 - I talk about my feelings: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">117.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q117A" name="Response.Q117A" tabindex="129" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q117AA"> I talk about my feelings:
+            <br/>1 = readily when people seem interested;, 2 = ?, 3 = only if I can't avoid it.</td>
+        </tr>
+
+        <!-- *** Question #118 of 211 - I like to think out ways in which our world could be changed to improve it. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">118.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q118A" name="Response.Q118A" tabindex="130" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q118AA"> I like to think out ways in which our world could be changed to improve it.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #119 of 211 - I think about things that I should have said, but didn't. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">119.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q119A" name="Response.Q119A" tabindex="131" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q119AA"> I think about things that I should have said, but didn't.
+            <br/>1 = hardly ever, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #120 of 211 - In my newspaper, I'd rather read: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">120.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q120A" name="Response.Q120A" tabindex="132" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q120AA"> In my newspaper, I'd rather read:
+            <br/>1 = articles on current social problems;, 2 = ?, 3 = all the local news.</td>
+        </tr>
+
+        <!-- *** Question #121 of 211 - I'd rather spend a free evening: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">121.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q121A" name="Response.Q121A" tabindex="133" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q121AA"> I'd rather spend a free evening:
+            <br/>1 = reading or working alone on a project;, 2 = ?, 3 = working on a task with friends.</td>
+        </tr>
+
+        <!-- *** Question #122 of 211 - If there is a chore to do, I'm more likely to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">122.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q122A" name="Response.Q122A" tabindex="134" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q122AA"> If there is a chore to do, I'm more likely to:
+            <br/>1 = put it off until it needs to be done;, 2 = ?, 3 = get started on it right away.</td>
+        </tr>
+
+        <!-- *** Question #123 of 211 - I prefer to eat lunch: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">123.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q123A" name="Response.Q123A" tabindex="135" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q123AA"> I prefer to eat lunch:
+            <br/>1 = with a group of people;, 2 = ?, 3 = by myself.</td>
+        </tr>
+
+        <!-- *** Question #124 of 211 - I am patient with people, even when they aren't polite and considerate of my feelings. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">124.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q124A" name="Response.Q124A" tabindex="136" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q124AA"> I am patient with people, even when they aren't polite and considerate of my feelings.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #125 of 211 - When I do something, I usually take time to think of everything I'll need for the job first. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">125.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q125A" name="Response.Q125A" tabindex="137" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q125AA"> When I do something, I usually take time to think of everything I'll need for the job first.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #126 of 211 - I get frustrated when people take too long to explain something. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">126.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q126A" name="Response.Q126A" tabindex="138" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q126AA"> I get frustrated when people take too long to explain something.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #127 of 211 - My friends would probably describe me as: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">127.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q127A" name="Response.Q127A" tabindex="139" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q127AA"> My friends would probably describe me as:
+            <br/>1 = warm and comforting;, 2 = ?, 3 = objective and formal.</td>
+        </tr>
+
+        <!-- *** Question #128 of 211 - I usually go to bed at night feeling satisfied with how my day went. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">128.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q128A" name="Response.Q128A" tabindex="140" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q128AA"> I usually go to bed at night feeling satisfied with how my day went.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #129 of 211 - For a pleasant hobby, I'd prefer: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">129.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q129A" name="Response.Q129A" tabindex="141" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q129AA"> For a pleasant hobby, I'd prefer:
+            <br/>1 = building or making something;, 2 = ?, 3 = working with a community service group.</td>
+        </tr>
+
+        <!-- *** Question #130 of 211 - I believe in complaining if I receive bad service or poor food in a restaurant. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">130.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q130A" name="Response.Q130A" tabindex="142" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q130AA"> I believe in complaining if I receive bad service or poor food in a restaurant.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #131 of 211 - I have more ups and downs in mood than most people I know. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">131.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q131A" name="Response.Q131A" tabindex="143" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q131AA"> I have more ups and downs in mood than most people I know.
+            <br/>1 = usually true, 2 = ?, 3 = usually false</td>
+        </tr>
+
+        <!-- *** Question #132 of 211 - When others don't see things my way, I can usually get them to come around. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">132.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q132A" name="Response.Q132A" tabindex="144" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q132AA"> When others don't see things my way, I can usually get them to come around.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #133 of 211 - I think that being free to do what I want is more important than good manners and respect for rules. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">133.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q133A" name="Response.Q133A" tabindex="145" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q133AA"> I think that being free to do what I want is more important than good manners and respect for rules.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #134 of 211 - I love to make people laugh with witty stories. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">134.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q134A" name="Response.Q134A" tabindex="146" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q134AA"> I love to make people laugh with witty stories.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #135 of 211 - I consider myself a very socially bold, outgoing person. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">135.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q135A" name="Response.Q135A" tabindex="147" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q135AA"> I consider myself a very socially bold, outgoing person.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #136 of 211 - If a person is clever enough to get around the rules without seeming to break them, he or she should: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">136.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q136A" name="Response.Q136A" tabindex="148" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q136AA"> If a person is clever enough to get around the rules without seeming to break them, he or she should:
+            <br/>1 = do it if there is a special reason;, 2 = ?, 3 = not do it.</td>
+        </tr>
+
+        <!-- *** Question #137 of 211 - I'm usually the one who takes the first step in making new friends. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">137.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q137A" name="Response.Q137A" tabindex="149" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q137AA"> I'm usually the one who takes the first step in making new friends.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #138 of 211 - I prefer reading rough and realistic action stories more than sensitive, imaginative novels. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">138.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q138A" name="Response.Q138A" tabindex="150" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q138AA"> I prefer reading rough and realistic action stories more than sensitive, imaginative novels.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #139 of 211 - I suspect that people who seem friendly to me could be disloyal behind my back. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">139.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q139A" name="Response.Q139A" tabindex="151" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q139AA"> I suspect that people who seem friendly to me could be disloyal behind my back.
+            <br/>1 = hardly ever, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #140 of 211 - In school I preferred (or prefer) math more than English. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">140.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q140A" name="Response.Q140A" tabindex="152" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q140AA"> In school I preferred (or prefer) math more than English.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #141 of 211 - Many people are too fussy and sensitive and should toughen up for their own good. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">141.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q141A" name="Response.Q141A" tabindex="153" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q141AA"> Many people are too fussy and sensitive and should toughen up for their own good.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #142 of 211 - I get so interested in thinking about ideas that I sometimes overlook practical details. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">142.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q142A" name="Response.Q142A" tabindex="154" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q142AA"> I get so interested in thinking about ideas that I sometimes overlook practical details.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #143 of 211 - If someone asks me a question that is too personal, I carefully try to avoid answering. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">143.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q143A" name="Response.Q143A" tabindex="155" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q143AA"> If someone asks me a question that is too personal, I carefully try to avoid answering.
+            <br/>1 = usually true, 2 = ?, 3 = usually false</td>
+        </tr>
+
+        <!-- *** Question #144 of 211 - When asked to do volunteer work, I say I'm too busy. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">144.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q144A" name="Response.Q144A" tabindex="156" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q144AA"> When asked to do volunteer work, I say I'm too busy.
+            <br/>1 = sometimes, 2 = ?, 3 = rarely</td>
+        </tr>
+
+        <!-- *** Question #145 of 211 - Sometimes I don't fit in very well because my ideas are not conventional or ordinary. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">145.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q145A" name="Response.Q145A" tabindex="157" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q145AA"> Sometimes I don't fit in very well because my ideas are not conventional or ordinary.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #146 of 211 - I consider myself less of a worrier than most people. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">146.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q146A" name="Response.Q146A" tabindex="158" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q146AA"> I consider myself less of a worrier than most people.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #147 of 211 - More trouble arises from people: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">147.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q147A" name="Response.Q147A" tabindex="159" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q147AA"> More trouble arises from people:
+            <br/>1 = questioning and changing methods that are already satisfactory;, 2 = ?, 3 = turning down promising, new approaches.</td>
+        </tr>
+
+        <!-- *** Question #148 of 211 - I'm very careful when it comes to choosing someone to really "open up" with. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">148.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q148A" name="Response.Q148A" tabindex="160" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q148AA"> I'm very careful when it comes to choosing someone to really "open up" with.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #149 of 211 - When I find I differ with someone on social views, I prefer to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">149.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q149A" name="Response.Q149A" tabindex="161" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q149AA"> When I find I differ with someone on social views, I prefer to:
+            <br/>1 = discuss what our basic differences mean;, 2 = ?, 3 = discuss something else.</td>
+        </tr>
+
+        <!-- *** Question #150 of 211 - People say I tend to be too self-critical. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">150.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q150A" name="Response.Q150A" tabindex="162" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q150AA"> People say I tend to be too self-critical.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #151 of 211 - I most enjoy a meal if it consists of familiar, everyday foods rather than new, unusual foods. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">151.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q151A" name="Response.Q151A" tabindex="163" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q151AA"> I most enjoy a meal if it consists of familiar, everyday foods rather than new, unusual foods.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #152 of 211 - I can easily go a whole morning without wanting to speak to anyone. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">152.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q152A" name="Response.Q152A" tabindex="164" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q152AA"> I can easily go a whole morning without wanting to speak to anyone.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #153 of 211 - I take advantage of people. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">153.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q153A" name="Response.Q153A" tabindex="165" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q153AA"> I take advantage of people.
+            <br/>1 = sometimes, 2 = ?, 3 = never</td>
+        </tr>
+
+        <!-- *** Question #154 of 211 - I like to plan ahead so that I don't waste time between tasks. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">154.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q154A" name="Response.Q154A" tabindex="166" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q154AA"> I like to plan ahead so that I don't waste time between tasks.
+            <br/>1 = rarely, 2 = ?, 3 = often</td>
+        </tr>
+
+        <!-- *** Question #155 of 211 - When I'm feeling tense, even small things get on my nerves. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">155.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q155A" name="Response.Q155A" tabindex="167" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q155AA"> When I'm feeling tense, even small things get on my nerves.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #156 of 211 - In building or making something, I would rather work: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">156.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q156A" name="Response.Q156A" tabindex="168" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q156AA"> In building or making something, I would rather work:
+            <br/>1 = with others;, 2 = ?, 3 = on my own.</td>
+        </tr>
+
+        <!-- *** Question #157 of 211 - In carrying out a task, I'm never satisfied unless I give careful attention even to small details. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">157.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q157A" name="Response.Q157A" tabindex="169" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q157AA"> In carrying out a task, I'm never satisfied unless I give careful attention even to small details.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #158 of 211 - I've trained myself to be patient with all kinds of people. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">158.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q158A" name="Response.Q158A" tabindex="170" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q158AA"> I've trained myself to be patient with all kinds of people.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #159 of 211 - I enjoy more listening to people talk about their personal feelings than about other things. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">159.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q159A" name="Response.Q159A" tabindex="171" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q159AA"> I enjoy more listening to people talk about their personal feelings than about other things.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #160 of 211 - There are times when I don't feel in the right mood to see anyone. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">160.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q160A" name="Response.Q160A" tabindex="172" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q160AA"> There are times when I don't feel in the right mood to see anyone.
+            <br/>1 = very rarely, 2 = ?, 3 = quite often</td>
+        </tr>
+
+        <!-- *** Question #161 of 211 - In a business it would be more interesting to be in charge of: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">161.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q161A" name="Response.Q161A" tabindex="173" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q161AA"> In a business it would be more interesting to be in charge of:
+            <br/>1 = machinery or keeping records;, 2 = ?, 3 = talking to and hiring new people.</td>
+        </tr>
+
+        <!-- *** Question #162 of 211 - In my everyday life, I hardly ever meet problems that I can't cope with. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">162.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q162A" name="Response.Q162A" tabindex="174" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q162AA"> In my everyday life, I hardly ever meet problems that I can't cope with.
+            <br/>1 = true, I can cope easily, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #163 of 211 - If I notice that another person's line of reasoning is wrong, I usually: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">163.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q163A" name="Response.Q163A" tabindex="175" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q163AA"> If I notice that another person's line of reasoning is wrong, I usually:
+            <br/>1 = point it out;, 2 = ?, 3 = let it pass.</td>
+        </tr>
+
+        <!-- *** Question #164 of 211 - I greatly enjoy inviting guests over and amusing them. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">164.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q164A" name="Response.Q164A" tabindex="176" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q164AA"> I greatly enjoy inviting guests over and amusing them.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #165 of 211 - I enjoy having some competition in the things I do. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">165.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q165A" name="Response.Q165A" tabindex="177" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q165AA"> I enjoy having some competition in the things I do.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #166 of 211 - Most rules are made to be broken when there are good reasons for it. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">166.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q166A" name="Response.Q166A" tabindex="178" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q166AA"> Most rules are made to be broken when there are good reasons for it.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #167 of 211 - I find it hard to speak in front of a large group. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">167.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q167A" name="Response.Q167A" tabindex="179" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q167AA"> I find it hard to speak in front of a large group.
+            <br/>1 = true, I usually find it very hard, 2 = ?, 3 = false, it doesn't bother me</td>
+        </tr>
+
+        <!-- *** Question #168 of 211 - In making a decision, I always think carefully about what's right and proper. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">168.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q168A" name="Response.Q168A" tabindex="180" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q168AA"> In making a decision, I always think carefully about what's right and proper.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #169 of 211 - In social groups I tend to feel shy and unsure of myself. *** -->
+        <tr>
+          <td class="td-up-padded " align="right">169.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q169A" name="Response.Q169A" tabindex="181" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q169AA"> In social groups I tend to feel shy and unsure of myself.
+            <br/>1 = true, 2 = ?, 3 = false</td>
+        </tr>
+
+        <!-- *** Question #170 of 211 - On television, I'd rather watch: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">170.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q170A" name="Response.Q170A" tabindex="182" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q170AA"> On television, I'd rather watch:
+            <br/>1 = a program on practical new inventions;, 2 = ?, 3 = a famous concert artist.</td>
+        </tr>
+
+        <!-- *** Question #171 of 211 - Minute is to hour as second is to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">171.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q171A" name="Response.Q171A" tabindex="183" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q171AA"> Minute is to hour as second is to:
+            <br/>1 = minute, 2 = millisecond, 3 = hour</td>
+        </tr>
+
+        <!-- *** Question #172 of 211 - Tadpole is to frog as larva is to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">172.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q172A" name="Response.Q172A" tabindex="184" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q172AA"> Tadpole is to frog as larva is to:
+            <br/>1 = spider, 2 = worm, 3 = insect</td>
+        </tr>
+
+        <!-- *** Question #173 of 211 - Pork is to pig as veal is to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">173.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q173A" name="Response.Q173A" tabindex="185" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q173AA"> Pork is to pig as veal is to:
+            <br/>1 = calf, 2 = chicken, 3 = lamb</td>
+        </tr>
+
+        <!-- *** Question #174 of 211 - Ice is to water as rock is to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">174.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q174A" name="Response.Q174A" tabindex="186" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q174AA"> Ice is to water as rock is to:
+            <br/>1 = lava, 2 = sand, 3 = oil</td>
+        </tr>
+
+        <!-- *** Question #175 of 211 - Better is to worst as slower is to: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">175.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q175A" name="Response.Q175A" tabindex="187" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q175AA"> Better is to worst as slower is to:
+            <br/>1 = fast, 2 = slowest, 3 = quickest</td>
+        </tr>
+
+        <!-- *** Question #176 of 211 - Which of the following words does not belong with the others? *** -->
+        <tr>
+          <td class="td-up-padded " align="right">176.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q176A" name="Response.Q176A" tabindex="188" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q176AA"> Which of the following words does not belong with the others?
+            <br/>1 = terminal, 2 = seasonal, 3 = cyclical</td>
+        </tr>
+
+        <!-- *** Question #177 of 211 - Which word does not belong with the other two? *** -->
+        <tr>
+          <td class="td-up-padded " align="right">177.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q177A" name="Response.Q177A" tabindex="189" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q177AA"> Which word does not belong with the other two?
+            <br/>1 = cat, 2 = near, 3 = sun</td>
+        </tr>
+
+        <!-- *** Question #178 of 211 - The opposite of "right" is the opposite of: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">178.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q178A" name="Response.Q178A" tabindex="190" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q178AA"> The opposite of "right" is the opposite of:
+            <br/>1 = left, 2 = wrong, 3 = correct</td>
+        </tr>
+
+        <!-- *** Question #179 of 211 - Which of the following words does not belong with the others? *** -->
+        <tr>
+          <td class="td-up-padded " align="right">179.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q179A" name="Response.Q179A" tabindex="191" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q179AA"> Which of the following words does not belong with the others?
+            <br/>1 = likely, 2 = probably, 3 = possibly</td>
+        </tr>
+
+        <!-- *** Question #180 of 211 - The opposite of the opposite of "inexact" is: *** -->
+        <tr>
+          <td class="td-up-padded " align="right">180.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q180A" name="Response.Q180A" tabindex="192" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q180AA"> The opposite of the opposite of "inexact" is:
+            <br/>1 = casual, 2 = accurate, 3 = rough</td>
+        </tr>
+
+        <!-- *** Question #181 of 211 - Which number should come next at the end of this series: 1, 4, 9, 16? *** -->
+        <tr>
+          <td class="td-up-padded " align="right">181.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q181A" name="Response.Q181A" tabindex="193" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q181AA"> Which number should come next at the end of this series: 1, 4, 9, 16?
+            <br/>1 = 20, 2 = 25, 3 = 32</td>
+        </tr>
+
+        <!-- *** Question #182 of 211 - Which should come next at the end of this row of letters: A B D G? *** -->
+        <tr>
+          <td class="td-up-padded " align="right">182.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q182A" name="Response.Q182A" tabindex="194" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q182AA"> Which should come next at the end of this row of letters: A B D G?
+            <br/>1 = H, 2 = K, 3 = J</td>
+        </tr>
+
+        <!-- *** Question #183 of 211 - Which should come next at the end of this row of letters: E I L? *** -->
+        <tr>
+          <td class="td-up-padded " align="right">183.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q183A" name="Response.Q183A" tabindex="195" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q183AA"> Which should come next at the end of this row of letters: E I L?
+            <br/>1 = M, 2 = N, 3 = P</td>
+        </tr>
+
+        <!-- *** Question #184 of 211 - Which number should come next at the end of this series: 1/12, 1/6, 1/3, 2/3? *** -->
+        <tr>
+          <td class="td-up-padded " align="right">184.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q184A" name="Response.Q184A" tabindex="196" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q184AA"> Which number should come next at the end of this series: 1/12, 1/6, 1/3, 2/3?
+            <br/>1 = 3/4, 2 = 4/3, 3 = 3/2</td>
+        </tr>
+
+        <!-- *** Question #185 of 211 - Which should come next at the end of this series of numbers: 1, 2, 0, 3, -1? *** -->
+        <tr>
+          <td class="td-up-padded " align="right">185.</td>
+          <td class="td-up-padded" align="left">
+            <input type="text" maxlength="1" style="width: 30px;" id="Response.Q185A" name="Response.Q185A" tabindex="197" dojotype="dijit.form.ValidationTextBox" regExp="1|2|3|-" onFocus="showText(this);" onBlur="hideText(this);">
+          </td>
+          <td class="responseLabel" id="Response.Q185AA"> Which should come next at the end of this series of numbers: 1, 2, 0, 3, -1?
+            <br/>1 = 5, 2 = 4, 3 = -3</td>
+        </tr>
+        <!-- Removed items 186-211 because Couple's Counseling Report not being migrated -->
+      </table>
+    </div>
+  </div>
+</form>
