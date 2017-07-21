@@ -1,20 +1,20 @@
-import {NgModule} from '@angular/core';
-import { DynamicComponent } from './dynamic.component';
-import {DynamicService} from './dynamic.service';
+import { NgModule } from "@angular/core";
+import { DynamicComponent } from "./dynamic.component";
+import { DynamicService } from "./dynamic.service";
 
 
 @NgModule({
-declarations: [DynamicComponent],
-exports: [DynamicComponent]
+    declarations: [DynamicComponent],
+    exports: [DynamicComponent]
 })
 
 export class DynamicModule {
 
-  static forRoot() {
-    return {
-      ngModule: DynamicModule,
-      providers: [DynamicService]
+    static forRoot() {
+        return {
+            ngModule: DynamicModule,
+            providers: [DynamicService]
+        }
     }
-  }
 
 }
