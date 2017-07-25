@@ -8,8 +8,9 @@ import {
     ModuleWithComponentFactories,
     ComponentFactory
 } from "@angular/core";
-import { Http, Response } from "@angular/http";
+import { Http, Response, Headers } from "@angular/http";
 import { Observable } from "rxjs/Observable";
+import "rxjs/Rx";
 
 
 export interface IDynamicComponent {
@@ -25,7 +26,7 @@ export class DynamicService {
 
     private factoryCache: {[templateKey: string]: ComponentFactory<IDynamicComponent>} = {};
 
-    createComponentModule(template: string, css: string, js: string) {
+    createComponentModule(template: string, css: string, js: string, responses: string) {
         let factory = this.factoryCache[template];
         console.log("Factory loaded from cache" + factory);
         if (factory) {
@@ -35,7 +36,7 @@ export class DynamicService {
             })
         }
 
-        let component = this.createComponent(template, css, js);
+        let component = this.createComponent(template, css, js, responses);
         let module = this.createModule(component);
 
         return new Promise((resolve) => {
@@ -51,7 +52,7 @@ export class DynamicService {
     }
 
 
-    private createComponent(html: string, css: string, js: string) {
+    private createComponent(html: string, css: string, js: string, responses: string) {
 
 
         @Component({
@@ -65,7 +66,12 @@ export class DynamicService {
 
             ngOnInit() {
                 this.appendJavaScript(js);
-                this.appendJavaScript("dojo.parser.parse('container');onFormLoad();autoAdvance = 'yes';");
+                this.createItemResponseElement(responses);
+                this.createSaveButtonDivElement();
+                this.appendJavaScript("dojo.parser.parse('container');onFormLoad();autoAdvance = 'yes';" +
+                    "fnConvertJsonToForm('manualEntry:itemResponses', 'myform');" +
+                    "function saveToJson() {  document.getElementById('formDiv').innerHTML = dojo.formToJson('myform');}");
+
             }
 
             /*
@@ -75,6 +81,24 @@ export class DynamicService {
                 let node = document.createElement("script");
                 node.innerHTML = script;
                 document.getElementById('container').appendChild(node);
+            }
+
+            private createItemResponseElement(value: string) {
+                let node = document.createElement("input");
+                node.id = "manualEntry:itemResponses";
+                node.value = value;
+                node.type = "hidden";
+                document.getElementById('container').appendChild(node);
+            }
+
+            private createSaveButtonDivElement() {
+                let node = document.createElement("div");
+                node.style.display = "none";
+                node.innerHTML = "<button id ='buttonItemResponseButton' name = 'buttonItemResponseButton' onclick='saveToJson();'> Save To Json </button>"
+
+                document.getElementById('container').appendChild(node);
+
+
             }
         }
         return TemplateComponent;
@@ -91,15 +115,35 @@ export class DynamicService {
         return RuntimeModule;
     }
 
-    public fetchManualEntry(): Observable<Response> {
-        return this.http.get("http://localhost:9001/bundle/itementry/html/BASC-3");
+    public fetchManualEntry(productCode: string): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/itementry/html/${productCode}`);
     }
 
-    public fetchManualEntryJS(): Observable<Response> {
-        return this.http.get("http://localhost:9001/bundle/itementry/js/BASC-3");
+    public fetchManualEntryJS(productCode: string): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/itementry/js/${productCode}`);
     }
 
-    public fetchManualEntryCSS(): Observable<Response> {
-        return this.http.get("http://localhost:9001/bundle/itementry/css/BASC-3");
+    public fetchManualEntryCSS(productCode: string): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/itementry/css/${productCode}`);
+    }
+
+    public fetchManualEntryResponse(productCode: string, examineeId: string): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/itementry/item-responses/${productCode}/${examineeId}`);
+    }
+
+    public saveResponses(response: any): Observable<Response> {
+        let headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        return this.http.put("http://localhost:9001/bundle/itementry/item-responses/save",
+            JSON.stringify(response), {headers: headers});
+    }
+
+
+    public listProducts(): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/product/all`);
+    }
+
+    public listForms(productId: string): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/product/forms/${productId}`);
     }
 }

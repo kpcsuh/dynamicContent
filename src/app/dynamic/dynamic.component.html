@@ -1,3 +1,32 @@
+<form #f="ngForm">
+
+    <div>
+        <label> Products: </label>
+        <select name="productName" [(ngModel)]="productSelected" (change)="productChange($event.target.value)">
+            <option [value]=""> Please select</option>
+            <option *ngFor="let p of products" [value]="p"> {{p}}</option>
+        </select>
+    </div>
+
+    <div>
+
+        <label> Forms :</label>
+
+        <select name="formName" [(ngModel)]="formSelected" (change)="formChange($event.target.value)">
+            <option [value]=""> Please select</option>
+            <option *ngFor="let f of forms" [value]="f"> {{f}}</option>
+        </select>
+    </div>
+
+    <button type="button" id="saveButton" name="saveButton" (click)="saveResponse()"> Update Json</button>
+
+</form>
+
+
 <div #itemEntry>
+
+</div>
+
+<div id="formDiv" name="formDiv">
 
 </div>
