@@ -1,4 +1,18 @@
+
+
+
+
 <form #f="ngForm">
+
+    <div>
+
+        <button (click) = "validate()" > Disable Items </button>
+    </div>
+
+    <div>
+
+        <button (click) = "enable()" > Enable Items </button>
+    </div>
 
     <div>
         <label> Products: </label>
@@ -21,6 +35,122 @@
     <button type="button" id="saveButton" name="saveButton" (click)="saveResponse()"> Update Json</button>
 
 </form>
+
+<div class = "container" layout="row">
+    <div [hidden] = "!showSettings">
+        <h1>Bundle settings:</h1>
+        <form #valuesForm >
+            <div class = "form-group">
+                <label>Age</label>
+                <input type="text"  class = "form-control" id ="age" name = "age" [(ngModel)]="platformValue.age" #age="ngModel">
+                <div [hidden] = "age || age.pristine" class= "alert alert-danger"> Age is required</div>
+            </div>
+            <div class = "form-group">
+            <label>Admistration Date: </label>
+            <input type="text"  class = "form-control" id ="adminDate" name = "adminDate" [(ngModel)]="platformValue.administrationDate" #adminDate="ngModel">
+            <div [hidden] = "adminDate || adminDate.pristine" class= "alert alert-danger">Admistration Date is required</div>
+            </div>
+
+            <div class = "form-group">
+            <label>Birth Date</label>
+            <input type="date"  class = "form-control" id ="bdate" name = "bdate" [(ngModel)]="platformValue.birthDate" #bdate="ngModel">
+            <div [hidden] = "bdate || bdate.pristine" class= "alert alert-danger">Birth Date is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>Auto Advance</label>
+                <input type="text"  class = "form-control" id ="autoAdvance" name = "autoAdvance" [(ngModel)]="platformValue.autoAdvance" #autoAdvance="ngModel">
+                <div [hidden] = "autoAdvance || autoAdvance.pristine" class= "alert alert-danger">Auto Advance is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>Delivery type</label>
+                <input type="text"  class = "form-control" id ="deliveryType" name = "deliveryType" [(ngModel)]="platformValue.deliveryType" #deliveryType="ngModel">
+                <div [hidden] = "deliveryType || deliveryType.pristine" class= "alert alert-danger">Auto Advance is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>status</label>
+                <input type="text"  class = "form-control" id ="status" name = "status" [(ngModel)]="platformValue.status" #status="ngModel">
+                <div [hidden] = "status || status.pristine" class= "alert alert-danger">Status is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>Examinee Label</label>
+                <input type="text"  class = "form-control" id ="examineeLable" name = "examineeLable" [(ngModel)]="platformValue.examinee" #examineeLable="ngModel">
+                <div [hidden] = "examineeLable || examineeLable.pristine" class= "alert alert-danger">Examinee Label is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>Number of Runs</label>
+                <input type="text"  class = "form-control" id ="noOfRuns" name = "noOfRuns" [(ngModel)]="platformValue.noOfRuns" #noOfRuns="ngModel">
+                <div [hidden] = "noOfRuns || noOfRuns.pristine" class= "alert alert-danger">Number of Runs is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>Number Of ExportRuns: </label>
+                <input type="text"  class = "form-control" id ="noOfExportRuns" name = "noOfExportRuns" [(ngModel)]="platformValue.noOfExportRuns" #noOfExportRuns="ngModel">
+                <div [hidden] = "noOfExportRuns || noOfExportRuns.pristine" class= "alert alert-danger">Auto Advance is required</div>
+            </div>
+
+
+            <div class = "form-group">
+                <label>Gender: </label>
+                <input type="text"  class = "form-control" id ="gender" name = "gender" [(ngModel)]="platformValue.gender" #gender="ngModel">
+                <div [hidden] = "gender || gender.pristine" class= "alert alert-danger">Auto Advance is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>User Date Format: </label>
+                <input type="text"  class = "form-control" id ="userDateFormat" name = "userDateFormat" [(ngModel)]="platformValue.userDateFormat" #userDateFormat="ngModel">
+                <div [hidden] = "userDateFormat || userDateFormat.pristine" class= "alert alert-danger">Auto Advance is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>Data Collection User Opt: </label>
+                <input type="text"  class = "form-control" id ="dataCollection_UserOpt" name = "dataCollection_UserOpt" [(ngModel)]="platformValue.dataCollection_UserOpt" #dataCollection_UserOpt="ngModel">
+                <div [hidden] = "dataCollection_UserOpt || dataCollection_UserOpt.pristine" class= "alert alert-danger">Auto Advance is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>Scoring Engine: </label>
+                <input type="text"  class = "form-control" id ="scoringEngine" name = "scoringEngine" [(ngModel)]="platformValue.scoringEngine" #scoringEngine="ngModel">
+                <div [hidden] = "scoringEngine || scoringEngine.pristine" class= "alert alert-danger">Scoring Engine is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>Battery Selected: </label>
+                <input type="text"  class = "form-control" id ="batterySelected" name = "batterySelected" [(ngModel)]="platformValue.batterySelected" #batterySelected="ngModel">
+                <div [hidden] = "batterySelected || batterySelected.pristine" class= "alert alert-danger">Battery Selected is required</div>
+            </div>
+
+            <div class = "form-group">
+                <label>First Name: </label>
+                <input type="text"  class = "form-control" id ="firstName" name = "firstName" [(ngModel)]="platformValue.firstName" #firstName="ngModel">
+                <div [hidden] = "firstName || firstName.pristine" class= "alert alert-danger">First Name is required</div>
+            </div>
+            <div class = "form-group">
+                <label>Last Name: </label>
+                <input type="text"  class = "form-control" id ="lastName" name = "lastName" [(ngModel)]="platformValue.lastName" #lastName="ngModel">
+                <div [hidden] = "lastName || lastName.pristine" class= "alert alert-danger">First Name is required</div>
+            </div>
+            <div class = "form-group">
+                <label>Middle Name: </label>
+                <input type="text"  class = "form-control" id ="middleName" name = "middleName" [(ngModel)]="platformValue.middleName" #middleName="ngModel">
+                <div [hidden] = "middleName || middleName.pristine" class= "alert alert-danger">Middle Name is required</div>
+            </div>
+
+            <div>
+              {{platformValue | json}}
+            </div>
+            <div>
+              <button (click) = "loadManualEntryForm()"> Load Manual Entry </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<hr/>
 
 
 <div #itemEntry>

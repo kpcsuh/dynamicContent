@@ -26,7 +26,7 @@ export class DynamicService {
 
     private factoryCache: {[templateKey: string]: ComponentFactory<IDynamicComponent>} = {};
 
-    createComponentModule(template: string, css: string, js: string, responses: string) {
+    createComponentModule(template: string, css: string, js: string, responses: string, settings:string) {
         let factory = this.factoryCache[template];
         console.log("Factory loaded from cache" + factory);
         if (factory) {
@@ -36,7 +36,7 @@ export class DynamicService {
             })
         }
 
-        let component = this.createComponent(template, css, js, responses);
+        let component = this.createComponent(template, css, js, responses, settings);
         let module = this.createModule(component);
 
         return new Promise((resolve) => {
@@ -52,28 +52,41 @@ export class DynamicService {
     }
 
 
-    private createComponent(html: string, css: string, js: string, responses: string) {
+    private createComponent(html: string, css: string, js: string, responses: string, settings:string) {
 
 
         @Component({
             selector: 't1',
             host: {'class': 'tundra', "id": "container"},
             template: html,
-            styles: [css],
+            styles: [css]
         })
         class TemplateComponent implements IDynamicComponent {
             @Input() entity: any;
 
+            constructor(private http: Http) {
+            }
             ngOnInit() {
+
                 this.appendJavaScript(js);
                 this.createItemResponseElement(responses);
                 this.createSaveButtonDivElement();
-                this.appendJavaScript("dojo.parser.parse('container');onFormLoad();autoAdvance = 'yes';" +
-                    "fnConvertJsonToForm('manualEntry:itemResponses', 'myform');" +
-                    "function saveToJson() {  document.getElementById('formDiv').innerHTML = dojo.formToJson('myform');}");
+                this.createDiableDivElement();
+                /*Reads javascript from file  innerComponetJs.js abd appends it*/
+                this.http.get("assets/local/innerComponetJs.js").subscribe(map => {
+                    this.appendJavaScript(map.text());
+                    this.appendJavaScript(settings);
+                });
+
 
             }
 
+
+            private appendJavaScriptToDiv(script: string) {
+                let node = document.createElement("div");
+                node.innerHTML = script;
+                document.getElementById('container').appendChild(node);
+            }
             /*
              This method appends javascript to #container element/ component.
              */
@@ -100,6 +113,18 @@ export class DynamicService {
 
 
             }
+
+            private createDiableDivElement() {
+                let node = document.createElement("div");
+                node.style.display = "none";
+                node.innerHTML = "<button id ='buttonDisableButton' name = 'buttonDisableButton' onclick='disableItemEntries(true);'> Disable </button>" + "" +
+                    "<button id ='buttonEnableButton' name = 'buttonEnableButton' onclick='disableItemEntries(false);'> Disable </button>";
+
+                document.getElementById('container').appendChild(node);
+
+
+
+            }
         }
         return TemplateComponent;
     }
@@ -115,26 +140,39 @@ export class DynamicService {
         return RuntimeModule;
     }
 
-    public fetchManualEntry(productCode: string): Observable<Response> {
-        return this.http.get(`http://localhost:9001/bundle/itementry/html/${productCode}`);
+    // public fetchManualEntry(productCode: string): Observable<Response> {
+    //     return this.http.get(`http://localhost:9001/bundle/itementry/html/${productCode}`);
+    // }
+    //
+    // public fetchManualEntryJS(productCode: string): Observable<Response> {
+    //     return this.http.get(`http://localhost:9001/bundle/itementry/js/${productCode}`);
+    // }
+    //
+    // public fetchManualEntryCSS(productCode: string): Observable<Response> {
+    //     return this.http.get(`http://localhost:9001/bundle/itementry/css/${productCode}`);
+    // }
+
+
+    public fetchManualEntry(productCode: string, formName:string): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/product/manualentry/html/${productCode}/${formName}`);
     }
 
-    public fetchManualEntryJS(productCode: string): Observable<Response> {
-        return this.http.get(`http://localhost:9001/bundle/itementry/js/${productCode}`);
+    public fetchManualEntryJS(productCode: string, formName:string): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/product/manualentry/js/${productCode}/${formName}`);
     }
 
-    public fetchManualEntryCSS(productCode: string): Observable<Response> {
-        return this.http.get(`http://localhost:9001/bundle/itementry/css/${productCode}`);
+    public fetchManualEntryCSS(productCode: string, formName:string): Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/product/manualentry/css/${productCode}/${formName}`);
     }
 
     public fetchManualEntryResponse(productCode: string, examineeId: string): Observable<Response> {
-        return this.http.get(`http://localhost:9001/bundle/itementry/item-responses/${productCode}/${examineeId}`);
+        return this.http.get(`http://localhost:9001/bundle/product/item-responses/${productCode}/${examineeId}`);
     }
 
     public saveResponses(response: any): Observable<Response> {
         let headers = new Headers();
         headers.append("Content-Type", "application/json");
-        return this.http.put("http://localhost:9001/bundle/itementry/item-responses/save",
+        return this.http.put("http://localhost:9001/bundle/product/item-responses/save",
             JSON.stringify(response), {headers: headers});
     }
 
@@ -146,4 +184,10 @@ export class DynamicService {
     public listForms(productId: string): Observable<Response> {
         return this.http.get(`http://localhost:9001/bundle/product/forms/${productId}`);
     }
+
+    public getPlatformValues(formId:string, examineeId:string) : Observable<Response> {
+        return this.http.get(`http://localhost:9001/bundle/assessment/data/values/{formId}/{examineeId}`)
+    }
+
+
 }

@@ -12,6 +12,28 @@ import {
     ComponentFactory
 } from "@angular/core";
 import { DynamicService, IDynamicComponent } from "./dynamic.service";
+import { PlatformValues } from "./platform/PlatformValues";
+
+class Test {
+    private name: string;
+    private flag: boolean;
+    private obj2: Obj2[];
+
+    constructor(name: string, flag: boolean, obj2: Obj2[]) {
+        this.name = name;
+        this.flag = flag;
+        this.obj2 = obj2;
+    }
+}
+
+class Obj2 {
+    private ele: any;
+
+    constructor(ele: any) {
+        this.ele = ele;
+    }
+}
+
 
 @Component({
     selector: 'dynamic',
@@ -20,12 +42,12 @@ import { DynamicService, IDynamicComponent } from "./dynamic.service";
 })
 export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChanges, OnDestroy, OnInit {
 
+
     @ViewChild("itemEntry", {read: ViewContainerRef})
     private vcr: ViewContainerRef;
 
     protected componentRef: ComponentRef<any>;
 
-    protected productCode: string;
     private manualEntry: string = null;
     private manulaEntryCss: string = null;
     private manualEntryJs: string = null;
@@ -35,13 +57,18 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
     private productSelected: string;
     private formSelected: string;
     private forms: string;
+    private platformValue: PlatformValues = new PlatformValues();
+    private showSettings: boolean = false;
+
+    private test: Test;
+
+    private examineeId: string = "1234";
 
 
     // until ngAfterViewInit, we cannot start (firstly) to process dynamic stuff
     protected wasViewInitialized = false;
 
     constructor(private dynamicService: DynamicService) {
-        this.productCode = "BASC-3";
 
     }
 
@@ -51,13 +78,14 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
      * @param css
      * @param js
      */
-    createManualEntryModule(html: string, css: string, js: string, response: string) {
+    createManualEntryModule(html: string, css: string, js: string, response: string, settings: string) {
 
-        let componet = this.dynamicService.createComponentModule(html, css, js, response).then((factory: ComponentFactory<IDynamicComponent>) => {
+        let componet = this.dynamicService.createComponentModule(html, css, js, response, settings).then((factory: ComponentFactory<IDynamicComponent>) => {
             let componentRef = this.vcr.createComponent(factory);
             let comp = componentRef.instance;
-        })
+        });
     }
+
 
     ngOnInit() {
         this.loadAllProducts();
@@ -66,26 +94,27 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
 
     ngAfterViewInit() {
         this.wasViewInitialized = true;
-        this.createDynamicManualEntry(this.productCode);
-
     }
 
     /**
      * This method cteates Dynamic component for manual entry.
      * @param productCode
      */
-    private createDynamicManualEntry(productCode: string) {
-        this.dynamicService.fetchManualEntry(productCode).subscribe(respHtml => {
+    private createDynamicManualEntry(productCode: string, formName: string) {
+        this.dynamicService.fetchManualEntry(productCode, formName).subscribe(respHtml => {
             this.manualEntry = respHtml.text();
 
-            this.dynamicService.fetchManualEntryCSS(productCode).subscribe(respCss => {
+            this.dynamicService.fetchManualEntryCSS(productCode, formName).subscribe(respCss => {
                 this.manulaEntryCss = respCss.text();
-                this.dynamicService.fetchManualEntryJS(productCode).subscribe(respJs => {
+                this.dynamicService.fetchManualEntryJS(productCode, formName).subscribe(respJs => {
                     this.manualEntryJs = respJs.text();
-                    this.dynamicService.fetchManualEntryResponse(productCode, "1234").subscribe(respResponse => {
+                    this.dynamicService.fetchManualEntryResponse(productCode, this.examineeId).subscribe(respResponse => {
+
                         this.manualEntryResponses = respResponse.text();
+                        console.log(this.manualEntryResponses);
                         this.createManualEntryModule(this.manualEntry, this.manulaEntryCss,
-                            this.manualEntryJs, this.manualEntryResponses);
+                            this.manualEntryJs, this.manualEntryResponses,
+                            this.createSettingsScript(JSON.stringify(this.platformValue)));
                     });
                 });
             });
@@ -101,10 +130,15 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
         if (this.wasViewInitialized) {
             return;
         }
-        this.createManualEntryModule(this.manualEntry, this.manulaEntryCss, this.manualEntryJs, this.manualEntryResponses);
+        this.createManualEntryModule(this.manualEntry, this.manulaEntryCss, this.manualEntryJs,
+            this.manualEntryResponses, this.createSettingsScript(JSON.stringify(this.platformValue)));
     }
 
     ngOnDestroy() {
+        this.cleanUpComponentRef();
+    }
+
+    private cleanUpComponentRef() {
         if (this.componentRef) {
             this.componentRef.destroy();
         }
@@ -117,8 +151,8 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
 
         var object = {
             "id": null,
-            "acronym": this.productCode,
-            "examineeId": "1234",
+            "acronym": this.productSelected,
+            "examineeId": this.examineeId,
             "responses": document.getElementById('formDiv').innerHTML
         }
 
@@ -140,19 +174,56 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
         });
     }
 
+    private destroyManualEntryModule() {
+        this.cleanUpComponentRef();
+        this.vcr.clear();
+    }
+
     productChange(productId: string) {
         console.log("selected value : " + productId + " " + this.productSelected);
         if (productId == "Plese select") {
             return;
         }
-
+        this.productSelected = productId;
+        this.destroyManualEntryModule();
         this.dynamicService.listForms(productId).subscribe(resp => {
             this.forms = resp.json();
-        })
+        });
     }
 
     formChange(value: string) {
+        this.formSelected = value;
+        this.destroyManualEntryModule();
+        this.dynamicService.getPlatformValues(this.formSelected, this.examineeId).subscribe(map => {
+            this.platformValue = map.json();
+            this.showSettings = true;
+        });
+
         console.log("selected form value : " + value + " " + this.formSelected);
+
+
+    }
+
+    private validate() {
+        document.getElementById('buttonDisableButton').click();
+    }
+
+    private enable() {
+        document.getElementById('buttonEnableButton').click();
+    }
+
+    private loadManualEntryForm() {
+        /** destroy existing component **/
+        this.destroyManualEntryModule();
+
+        /**
+         * Create component.
+         */
+        this.createDynamicManualEntry(this.productSelected, this.formSelected);
+    }
+
+    private createSettingsScript(json: string): string {
+        return "onPlatformChange(" + json + ")";
     }
 
 }
