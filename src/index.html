@@ -6,6 +6,7 @@
     <base href="/">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" type="text/css" href= "/assets/static/js/dojotoolkit/dijit/themes/tundra/tundra.css" >
     <link rel="stylesheet" type="text/css" href= "/assets/static/js/dojotoolkit/dojo/resources/dojo.css" >
@@ -18,63 +19,65 @@
     <!--<link href="/assets/static/js/dojotoolkit/dijit/themes/tundra/tundra.css" rel="stylesheet" type="text/css">-->
     <!--<link href="/assets/static/js/dojotoolkit/dojo/resources/dojo.css" rel="stylesheet" type="text/css">-->
     <!-- <script type="text/javascript" src="/assets/static/js/a4j/framework.pack.js"></script> -->
-    <script type="text/javascript" src="/assets/static/js/dojotoolkit/dojo/dojo.js"
-            djconfig="parseOnLoad: true"></script>
-    <script type="text/javascript" src="/assets/static/js/dojotoolkit/dijit/dijit.js"
-            djconfig="parseOnLoad: true"></script>
-    <!-- Include prototype.js -->
-    <script>
-        var wat = Array.from;
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.2/prototype.js"></script>
-    <script>
-        Array.from = wat;
-    </script>
-    <!-- <script type="text/javascript" src="/assets/static/js/a4j/ui.pack.js"></script> -->
-    <script src="/assets/static/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-    <script type="text/javascript" src="/assets/static/js/jquery-ui-1.8.22.custom.min.js"></script>
-    <script type="text/javascript">
-        var addAllCols = '<< Add all';
-        var removeAllCols = 'Remove all >>';
-        var visibleCols = 'Visible Columns';
-        var chooseCols = 'Choose columns';
-        //var clearGridSettings = 'Clear saved grid settings';
-    </script>
-    <script type="text/javascript" src="/assets/static/plugins/ui.multiselect.js"></script>
-    <script src="/assets/static/js/jquery.jqGrid.min.js" type="text/javascript"></script>
-    <script type="text/javascript" src="/assets/static/js/qGlobal.js"></script>
-    <script type="text/javascript" src="/assets/static/js/calendarInput.js"></script>
-    <script type="text/javascript" src="/assets/static/js/editor/jquery.wysiwyg.js"></script>
-    <script type="text/javascript" src="/assets/static/js/editor/controls/wysiwyg.table.js"></script>
-    <script type="text/javascript" src="/assets/static/js/editor/controls/wysiwyg.insertToken.js"></script>
-    <script src="/assets/static/js/i18n/grid.locale-en.js" type="text/javascript"></script>
 
-    <script type="text/javascript">
-        dojo.registerModulePath('BUNDLE', '../../../../static/js/bundle');
-        dojo.require("dojo.parser");
-        dojo.require("dijit.form.Form");
-        dojo.require("dijit.layout.TabContainer");
-        dojo.require("dijit.layout.ContentPane");
-        dojo.require("dijit.form.ValidationTextBox");
-        dojo.require("dijit.form.DateTextBox");
-        dojo.require("dijit.form.Select");
-        dojo.require("dijit.form.NumberTextBox");
+  <script type="text/javascript" src="/assets/static/js/dojotoolkit/dojo/dojo.js"
+          djconfig="parseOnLoad: true"></script>
+  <script type="text/javascript" src="/assets/static/js/dojotoolkit/dijit/dijit.js"
+          djconfig="parseOnLoad: true"></script>
+  <!-- Include prototype.js -->
+  <script>
+    var wat = Array.from;
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.2/prototype.js"></script>
+  <script>
+    Array.from = wat;
+  </script>
+  <script src="/assets/static/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+  <script type="text/javascript" src="/assets/static/js/jquery-ui-1.8.22.custom.min.js"></script>
+  <script type="text/javascript">
+    var addAllCols = '<< Add all';
+    var removeAllCols = 'Remove all >>';
+    var visibleCols = 'Visible Columns';
+    var chooseCols = 'Choose columns';
+    //var clearGridSettings = 'Clear saved grid settings';
+  </script>
+  <script type="text/javascript" src="/assets/static/plugins/ui.multiselect.js"></script>
+  <script src="/assets/static/js/jquery.jqGrid.min.js" type="text/javascript"></script>
+  <script type="text/javascript" src="/assets/static/js/qGlobal.js"></script>
+  <script type="text/javascript" src="/assets/static/js/calendarInput.js"></script>
+  <script type="text/javascript" src="/assets/static/js/editor/jquery.wysiwyg.js"></script>
+  <script type="text/javascript" src="/assets/static/js/editor/controls/wysiwyg.table.js"></script>
+  <script type="text/javascript" src="/assets/static/js/editor/controls/wysiwyg.insertToken.js"></script>
+  <script src="/assets/static/js/i18n/grid.locale-en.js" type="text/javascript"></script>
 
-        // Added for WRMT3
-        dojo.require("dijit.Dialog");
-        dojo.require("dijit.TitlePane");
-        dojo.require("dijit.form.Textarea");
-        dojo.require("dijit.Tooltip");
+  <script type="text/javascript">
+    dojo.registerModulePath('BUNDLE', '../../../../static/js/bundle');
+    dojo.require("dojo.parser");
+    dojo.require("dijit.form.Form");
+    dojo.require("dijit.layout.TabContainer");
+    dojo.require("dijit.layout.ContentPane");
+    dojo.require("dijit.form.ValidationTextBox");
+    dojo.require("dijit.form.DateTextBox");
+    dojo.require("dijit.form.Select");
+    dojo.require("dijit.form.NumberTextBox");
 
-        dojo.require("dijit.form.CheckBox");  // FIXME: Only needed for CELF Meta; need to find a way to load these in bundle
-        dojo.require("dijit.form.RadioButton"); // FIXME: Only needed for CELF Meta; need to find a way to load these in bundle
+    // Added for WRMT3
+    dojo.require("dijit.Dialog");
+    dojo.require("dijit.TitlePane");
+    dojo.require("dijit.form.Textarea");
+    dojo.require("dijit.Tooltip");
 
-        // Custom module for common Bundle HTML functionality.
-        dojo.require("BUNDLE");
+    dojo.require("dijit.form.CheckBox");  // FIXME: Only needed for CELF Meta; need to find a way to load these in bundle
+    dojo.require("dijit.form.RadioButton"); // FIXME: Only needed for CELF Meta; need to find a way to load these in bundle
 
-    </script>
+    // Custom module for common Bundle HTML functionality.
+    dojo.require("BUNDLE");
+
+  </script>
+
+
 </head>
-<body>
+<body class="tundra">
 
 <app-root>Loading...</app-root>
 </body>

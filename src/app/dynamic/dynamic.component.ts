@@ -1,15 +1,15 @@
 import {
-    Component,
-    OnInit,
-    ViewChild,
-    ViewContainerRef,
-    ComponentRef,
-    AfterViewInit,
-    AfterViewChecked,
-    OnChanges,
-    OnDestroy,
-    SimpleChange,
-    ComponentFactory
+  Component,
+  OnInit,
+  ViewChild,
+  ViewContainerRef,
+  ComponentRef,
+  AfterViewInit,
+  AfterViewChecked,
+  OnChanges,
+  OnDestroy,
+  SimpleChange,
+  ComponentFactory, ViewEncapsulation
 } from "@angular/core";
 import { DynamicService, IDynamicComponent } from "./dynamic.service";
 import { PlatformValues } from "./platform/PlatformValues";
@@ -38,7 +38,7 @@ class Obj2 {
 @Component({
     selector: 'dynamic',
     templateUrl: './dynamic.component.html',
-    styleUrls: ['./dynamic.component.css']
+    styleUrls: ['./dynamic.component.css'],
 })
 export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChanges, OnDestroy, OnInit {
 
@@ -54,7 +54,7 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
     private manualEntryResponses: string = null;
     itemResponseIput: string = "";
     private products;
-    private productSelected: string;
+    private productSelected: string = "";
     private formSelected: string;
     private forms: string;
     private platformValue: PlatformValues = new PlatformValues();
@@ -63,6 +63,15 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
     private test: Test;
 
     private examineeId: string = "1234";
+    selectedValue: string;
+
+  foods = [
+    {value: 'steak-0', viewValue: 'Steak'},
+    {value: 'pizza-1', viewValue: 'Pizza'},
+    {value: 'tacos-2', viewValue: 'Tacos'}
+  ];
+
+
 
 
     // until ngAfterViewInit, we cannot start (firstly) to process dynamic stuff
@@ -114,7 +123,8 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
                         console.log(this.manualEntryResponses);
                         this.createManualEntryModule(this.manualEntry, this.manulaEntryCss,
                             this.manualEntryJs, this.manualEntryResponses,
-                            this.createSettingsScript(JSON.stringify(this.platformValue)));
+                            this.createSettingsScript(JSON.stringify(this.platformValue))
+                        );
                     });
                 });
             });
@@ -145,7 +155,7 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
         this.componentRef = null;
     }
 
-    public saveResponse() {
+    public saveResponse(event:any) {
         console.log("Response saved");
         document.getElementById('buttonItemResponseButton').click();
 
@@ -204,15 +214,10 @@ export class DynamicComponent implements AfterViewInit, AfterViewChecked, OnChan
 
     }
 
-    private validate() {
-        document.getElementById('buttonDisableButton').click();
-    }
 
-    private enable() {
-        document.getElementById('buttonEnableButton').click();
-    }
 
-    private loadManualEntryForm() {
+    private loadManualEntryForm(value:boolean) {
+      console.log("Logged value :" + value);
         /** destroy existing component **/
         this.destroyManualEntryModule();
 
