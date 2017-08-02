@@ -9,11 +9,12 @@ function cleanDijitWidgets() {
 cleanDijitWidgets();
 
 dojo.parser.parse('container');
+autoAdvance = 'yes';
 onFormLoad();
 
-autoAdvance = 'yes';
-fnConvertJsonToForm('manualEntry:itemResponses', 'myform');
 
+fnConvertJsonToForm('manualEntry:itemResponses', 'myform');
+console.log("autoAdvance :" + autoAdvance)
 function saveToJson() {
   document.getElementById('formDiv').innerHTML = dojo.formToJson('myform');
 }

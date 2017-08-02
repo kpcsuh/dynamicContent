@@ -1,0 +1,254 @@
+<div class="flex-container" fxLayout="row" fxLayout.xs="column" fxLayoutAlign="center center">
+  <md-toolbar class="tool-bar-align" color="secondary">Manual Entry Item Responses</md-toolbar>
+  <md-card class="settings-card settings-basic">
+    <p></p>
+    <md-card-content>
+      <form ng-form="settingsForm">
+
+        <table>
+          <tr>
+            <td class="td-padding">
+              <md-select name="productName" [(ngModel)]="productSelected" (change)="productChange()"
+                         [style.width]="'100%'"
+                         placeholder="Products:">
+                <md-option [value]=""> Please select</md-option>
+                <md-option *ngFor="let p of products" [value]="p"> {{p}}</md-option>
+              </md-select>
+
+            </td>
+            <td></td>
+
+
+            <td class="td-padding">
+              <md-select name="formName" [(ngModel)]="formSelected" (change)="formChange()" placeholder="Forms:"
+                         [style.width]="'100%'">
+                <md-option [value]=""> Please select</md-option>
+                <md-option *ngFor="let f of forms" [value]="f"> {{f}}</md-option>
+              </md-select>
+            </td>
+
+            <td></td>
+            <td>
+              <section class="example-section">
+                <md-slide-toggle id="showSettingsCheckbox" name="showSettingsCheckbox" class="example-margin"
+                                 [(ngModel)]="showSettings">Show Platform Variables
+                </md-slide-toggle>
+
+              </section>
+            </td>
+          </tr>
+        </table>
+
+
+        <div class="settingsDiv" layout="row" [hidden]="!showSettings">
+          <md-toolbar class="tool-bar-align" color="secondary">Platform Variables</md-toolbar>
+          <div class="form-group">
+
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="age" name="age" [(ngModel)]="platformValue.age"
+                     #age="ngModel" placeholder="Age">
+              <div [hidden]="age || age.pristine" class="alert alert-danger"> Age is required</div>
+            </md-input-container>
+          </div>
+          <div class="form-group">
+
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="adminDate" name="adminDate"
+                     [(ngModel)]="platformValue.administrationDate" #adminDate="ngModel"
+                     placeholder="Admistration Date:">
+              <div [hidden]="adminDate || adminDate.pristine" class="alert alert-danger">Admistration Date is
+                required
+              </div>
+            </md-input-container>
+          </div>
+
+
+          <div class="form-group">
+
+            <md-input-container class="settings-full-width">
+              <input mdInput type="date" class="form-control" id="bdate" name="bdate"
+                     [(ngModel)]="platformValue.birthDate"
+                     #bdate="ngModel" placeholder="Birth Date">
+              <div [hidden]="bdate || bdate.pristine" class="alert alert-danger">Birth Date is required</div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="autoAdvance" name="autoAdvance"
+                     [(ngModel)]="platformValue.autoAdvance" #autoAdvance="ngModel" placeholder="Auto Advance">
+              <div [hidden]="autoAdvance || autoAdvance.pristine" class="alert alert-danger">Auto Advance is
+                required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="deliveryType" name="deliveryType"
+                     [(ngModel)]="platformValue.deliveryType" #deliveryType="ngModel" placeholder="Delivery type">
+              <div [hidden]="deliveryType || deliveryType.pristine" class="alert alert-danger">Auto Advance is
+                required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="status" name="status"
+                     [(ngModel)]="platformValue.status"
+                     #status="ngModel" placeholder="status">
+              <div [hidden]="status || status.pristine" class="alert alert-danger">Status is required</div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <label></label>
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="examineeLable" name="examineeLable"
+                     [(ngModel)]="platformValue.examinee" #examineeLable="ngModel" placeholder="Examinee Label">
+              <div [hidden]="examineeLable || examineeLable.pristine" class="alert alert-danger">Examinee Label is
+                required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <label></label>
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="noOfRuns" name="noOfRuns"
+                     [(ngModel)]="platformValue.noOfRuns" #noOfRuns="ngModel" placeholder="Number of Runs">
+              <div [hidden]="noOfRuns || noOfRuns.pristine" class="alert alert-danger">Number of Runs is required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="noOfExportRuns" name="noOfExportRuns"
+                     [(ngModel)]="platformValue.noOfExportRuns" #noOfExportRuns="ngModel"
+                     placeholder="Number Of ExportRuns:">
+              <div [hidden]="noOfExportRuns || noOfExportRuns.pristine" class="alert alert-danger">Auto Advance is
+                required
+              </div>
+            </md-input-container>
+          </div>
+
+
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="gender" name="gender"
+                     [(ngModel)]="platformValue.gender"
+                     #gender="ngModel" placeholder="Gender:">
+              <div [hidden]="gender || gender.pristine" class="alert alert-danger">Auto Advance is required</div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="userDateFormat" name="userDateFormat"
+                     [(ngModel)]="platformValue.userDateFormat" #userDateFormat="ngModel"
+                     placeholder="User Date Format:">
+              <div [hidden]="userDateFormat || userDateFormat.pristine" class="alert alert-danger">Auto Advance is
+                required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="dataCollection_UserOpt" name="dataCollection_UserOpt"
+                     [(ngModel)]="platformValue.dataCollection_UserOpt" #dataCollection_UserOpt="ngModel"
+                     placeholder="Data Collection User Opt:">
+              <div [hidden]="dataCollection_UserOpt || dataCollection_UserOpt.pristine" class="alert alert-danger">
+                Auto Advance is required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="scoringEngine" name="scoringEngine"
+                     [(ngModel)]="platformValue.scoringEngine" #scoringEngine="ngModel" placeholder="Scoring Engine:">
+              <div [hidden]="scoringEngine || scoringEngine.pristine" class="alert alert-danger">Scoring Engine is
+                required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="batterySelected" name="batterySelected"
+                     [(ngModel)]="platformValue.batterySelected" #batterySelected="ngModel"
+                     placeholder="Battery Selected:">
+              <div [hidden]="batterySelected || batterySelected.pristine" class="alert alert-danger">Battery Selected
+                is required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="firstName" name="firstName"
+                     [(ngModel)]="platformValue.firstName" #firstName="ngModel" placeholder="First Name:">
+              <div [hidden]="firstName || firstName.pristine" class="alert alert-danger">First Name is required</div>
+            </md-input-container>
+          </div>
+          <div class="form-group">
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="lastName" name="lastName"
+                     [(ngModel)]="platformValue.lastName" #lastName="ngModel" placeholder="Last Name:">
+              <div [hidden]="lastName || lastName.pristine" class="alert alert-danger">First Name is required</div>
+            </md-input-container>
+          </div>
+          <div class="form-group">
+
+            <md-input-container class="settings-full-width">
+              <input mdInput type="text" class="form-control" id="middleName" name="middleName"
+                     [(ngModel)]="platformValue.middleName" #middleName="ngModel" placeholder="Middle Name:">
+              <div [hidden]="middleName || middleName.pristine" class="alert alert-danger">Middle Name is required
+              </div>
+            </md-input-container>
+          </div>
+
+          <div>
+            {{platformValue | json}}
+          </div>
+        </div>
+
+
+        <table>
+          <tr>
+
+            <td>
+              <button md-button color="secondary" md-raised-button (click)="validate()"
+                      [disabled]="!enableManualEntryRelatedButtons"> Disable Items
+              </button>
+            </td>
+            <td>
+              <button md-button color="secondary" md-raised-button (click)="enable()"
+                      [disabled]="!enableManualEntryRelatedButtons"> Enable Items
+              </button>
+            </td>
+            <td>
+              <button md-button md-raised-button id="saveButton" name="saveButton"
+                      [disabled]="!enableManualEntryRelatedButtons"
+                      md-raised-button (click)="sendSaveResponseEvent()"> Save Responses
+              </button>
+            </td>
+            <td>
+              <button md-button md-raised-button color="primary" [disabled]="!enableLoadManualEntryButton"
+                      (click)="loadManualEntryForm()"> Load Manual Entry
+              </button>
+            </td>
+          </tr>
+        </table>
+        <div>
+        </div>
+
+      </form>
+    </md-card-content>
+  </md-card>
+</div>

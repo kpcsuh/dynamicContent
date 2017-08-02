@@ -1,0 +1,36 @@
+<div class="login-div"></div>
+<md-card class="example-card">
+  <md-card-header>
+    <div md-card-avatar class="example-header-image"></div>
+    <md-card-title>Pearson Customer login</md-card-title>
+    <md-card-subtitle>Clinical Assessments</md-card-subtitle>
+  </md-card-header>
+  <img md-card-image src="../../assets/img/child-writing.jpg">
+  <md-card-content>
+    <form #loginForm="ngForm" (submit)="login()"><br>
+      <md-input-container>
+        <input mdInput type="text" required [(ngModel)]="username" id="username" name="username" required>
+        <md-placeholder>
+          <i class="material-icons app-input-icon">account_circle</i>Username
+        </md-placeholder>
+      </md-input-container>
+      <br><br>
+      <md-input-container>
+        <input mdInput type="password" required [(ngModel)]="password" id="password" name="password" required>
+        <md-placeholder>
+          <i class="material-icons app-input-icon">lock_open</i>Password
+        </md-placeholder>
+      </md-input-container>
+      <br><br>
+      <button md-raised-button color="primary" type="submit" name="action" [disabled]="!loginForm.form.valid">LOGIN
+      </button>
+      <br><br>
+      <span id="err"><small>{{errorMessage}}</small></span>
+      <br>
+      <md-slide-toggle color="primary">
+        <small>Remember me!</small>
+      </md-slide-toggle>
+    </form>
+  </md-card-content>
+</md-card>
+

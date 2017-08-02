@@ -495,7 +495,7 @@ dojo.provide("dojox.gfx._base");
 		}
 	}
 
-	// candidate for dojox.html.metrics (dynamic font resize handler is not implemented here)
+	// candidate for dojox.html.metrics (manual-entry font resize handler is not implemented here)
 
 	//	derived from Morris John's emResized measurer
 	b._getFontMeasurements = function(){

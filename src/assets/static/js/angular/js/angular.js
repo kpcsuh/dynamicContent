@@ -3865,7 +3865,7 @@ function $CompileProvider($provide) {
      * @param node Node to search.
      * @param directives An array to which the directives are added to. This array is sorted before
      *        the function returns.
-     * @param attrs The shared attrs object which is used to populate the normalized attributes.
+     * @param attrs The core attrs object which is used to populate the normalized attributes.
      * @param {number=} maxPriority Max directive priority.
      */
     function collectDirectives(node, directives, attrs, maxPriority) {
@@ -3943,7 +3943,7 @@ function $CompileProvider($provide) {
      * @param {Array} directives Array of collected directives to execute their compile function.
      *        this needs to be pre-sorted by priority order.
      * @param {Node} compileNode The raw DOM node to apply the compile functions to
-     * @param {Object} templateAttrs The shared attribute function
+     * @param {Object} templateAttrs The core attribute function
      * @param {function(angular.Scope[, cloneAttachFn]} transcludeFn A linking function, where the
      *        scope argument is auto-generated to the new child of the transcluded parent scope.
      * @param {DOMElement} $rootElement If we are working on the root of the compile tree then this
@@ -4517,7 +4517,7 @@ function directiveNormalize(name) {
  * @name ng.$compile.directive.Attributes
  * @description
  *
- * A shared object between directive compile / linking functions which contains normalized DOM element
+ * A core object between directive compile / linking functions which contains normalized DOM element
  * attributes. The the values reflect current binding state `{{ }}`. The normalization is needed
  * since all of these are treated as equivalent in Angular:
  *

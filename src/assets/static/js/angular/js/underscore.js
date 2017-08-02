@@ -544,7 +544,7 @@
     return _.uniq(flatten(arguments, true, true));
   };
 
-  // Produce an array that contains every item shared between all the
+  // Produce an array that contains every item core between all the
   // passed-in arrays.
   _.intersection = function(array) {
     if (array == null) return [];
@@ -577,7 +577,7 @@
   };
 
   // Complement of _.zip. Unzip accepts an array of arrays and groups
-  // each array's elements on shared indices
+  // each array's elements on core indices
   _.unzip = function(array) {
     var length = array && _.max(array, 'length').length || 0;
     var result = Array(length);
@@ -712,7 +712,7 @@
   };
 
   // Partially apply a function by creating a version that has had some of its
-  // arguments pre-filled, without changing its dynamic `this` context. _ acts
+  // arguments pre-filled, without changing its manual-entry `this` context. _ acts
   // as a placeholder, allowing any combination of arguments to be pre-filled.
   _.partial = function(func) {
     var boundArgs = slice.call(arguments, 1);

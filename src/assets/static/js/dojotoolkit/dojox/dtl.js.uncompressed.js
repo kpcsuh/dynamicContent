@@ -33,13 +33,13 @@ dojox.string.Builder = function(/*String?*/str){
 			/*  
 				This is a loop unroll was designed specifically for Firefox;
 				it would seem that static index access on an Arguments
-				object is a LOT faster than doing dynamic index access.
+				object is a LOT faster than doing manual-entry index access.
 				Therefore, we create a buffer string and take advantage
 				of JS's switch fallthrough.  The peformance of this method
 				comes very close to straight up string concatenation (+=).
 
 				If the arguments object length is greater than 9, we fall
-				back to standard dynamic access.
+				back to standard manual-entry access.
 
 				This optimization seems to have no real effect on either
 				Safari or Opera, so we just use it for all.
@@ -2337,7 +2337,7 @@ dojo.provide("dojox.dtl.tag.loader");
 						parent = this.parent = this.parent.toString();
 					}
 				}
-				if(parent && parent.indexOf("shared:") === 0){
+				if(parent && parent.indexOf("core:") === 0){
 					this.shared = true;
 					parent = this.parent = parent.substring(7, parent.length);
 				}
@@ -2367,7 +2367,7 @@ dojo.provide("dojox.dtl.tag.loader");
 				if(node instanceof dojox.dtl.tag.loader.BlockNode){
 					var old = parent.blocks[node.name];
 					if(old && old.nodelist != node.nodelist){
-						// In a shared template, the individual blocks might change
+						// In a core template, the individual blocks might change
 						buffer = old.nodelist.unrender(context, buffer);
 					}
 					parent.blocks[node.name] = buffer.blocks[node.name] = {
@@ -2492,7 +2492,7 @@ dojo.provide("dojox.dtl.tag.loader");
 			}else{
 				key = parts[1];
 			}
-			if(parent && parent.indexOf("shared:") == 0){
+			if(parent && parent.indexOf("core:") == 0){
 				shared = true;
 				parent = parent.substring(7, parent.length);
 			}

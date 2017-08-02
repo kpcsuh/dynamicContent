@@ -3913,7 +3913,7 @@ dojo.declare("dijit._Widget", null, {
 		return result || this;
 	},
 	
-	_attrPairNames: {},		// shared between all widgets
+	_attrPairNames: {},		// core between all widgets
 	_getAttrNames: function(name){
 		// summary:
 		//		Helper function for get() and set().

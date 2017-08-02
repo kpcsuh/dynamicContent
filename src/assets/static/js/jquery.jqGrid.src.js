@@ -10189,7 +10189,7 @@ addSubGrid : function( pos, sind ) {
 						if(bfsc===false) {return false;}
 						if(ts.p.subGridOptions.reloadOnExpand === true) {
 							$(r).remove(".ui-subgrid");
-						} else if($(r).hasClass('ui-subgrid')) { // incase of dynamic deleting
+						} else if($(r).hasClass('ui-subgrid')) { // incase of manual-entry deleting
 							$(r).hide();
 						}
 						$(this).html("<a href='javascript:void(0);'><span class='ui-icon "+ts.p.subGridOptions.plusicon+"'></span></a>").removeClass("sgexpanded").addClass("sgcollapsed");

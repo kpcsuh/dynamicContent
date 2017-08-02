@@ -1,0 +1,19 @@
+<md-toolbar color="primary">
+  <div class="profile">
+    Assessments App
+  </div>
+  <div>
+    <button md-button [mdMenuTriggerFor]="menu"><label class="material-icons">account_circle</label></button>
+    <md-menu #menu="mdMenu">
+      <button md-menu-item (click)="logout()">logout</button>
+      <button md-menu-item>Settings</button>
+    </md-menu>
+  </div>
+
+</md-toolbar>
+<md-tab-group>
+  <md-tab label="Manual Entry">
+    <manaul-entry></manaul-entry>
+  </md-tab>
+  <md-tab label="Report">Report Tab</md-tab>
+</md-tab-group>

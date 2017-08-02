@@ -94,7 +94,7 @@ _17=this.parent=this.parent.toString();
 }
 }
 }
-if(_17&&_17.indexOf("shared:")===0){
+if(_17&&_17.indexOf("core:")===0){
 this.shared=true;
 _17=this.parent=_17.substring(7,_17.length);
 }
@@ -225,7 +225,7 @@ _3e=_3c[1].substring(1,_3c[1].length-1);
 }else{
 key=_3c[1];
 }
-if(_3e&&_3e.indexOf("shared:")==0){
+if(_3e&&_3e.indexOf("core:")==0){
 _3d=true;
 _3e=_3e.substring(7,_3e.length);
 }

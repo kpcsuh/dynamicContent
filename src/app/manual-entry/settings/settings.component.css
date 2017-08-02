@@ -1,0 +1,56 @@
+.title-align {
+  text-align: center;
+}
+
+.tool-bar-align {
+  flex: 1 1 auto;
+}
+
+.settings-basic {
+  padding: 20px;
+  display: flex;
+}
+
+.settings-basic .mat-card-content {
+  padding: 16px;
+}
+
+.td-padding {
+  padding: 0.3em;
+  width: 250px;
+}
+
+.settings-full-width {
+  /*width: 100%;*/
+}
+
+.settings-card {
+  margin: 16px;
+}
+
+.settings-text-align-end {
+  text-align: end;
+}
+
+.settings-textarea {
+  resize: none;
+  border: none;
+  overflow: auto;
+  padding: 0;
+  background: lightblue;
+}
+
+.example-h2 {
+  margin: 10px;
+}
+
+.example-section {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  height: 60px;
+}
+
+.example-margin {
+  margin: 0 10px;
+}

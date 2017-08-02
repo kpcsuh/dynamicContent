@@ -8713,7 +8713,7 @@ return true
 this.oldDisabled=this.disabled;
 if(G=="auto"||G=="true"){var C=window.location.href.substr(0,5).toLowerCase()=="https"?"s":"";
 var I=document.createElement("div");
-I.innerHTML='<a href="http'+C+'://www.adobe.com/go/getflashplayer"><img style="border:0px; margin:2px" src="http'+C+'://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a>';
+I.innerHTML='<a href="http'+C+'://www.adobe.com/go/getflashplayer"><img style="border:0px; margin:2px" src="http'+C+'://www.adobe.com/images/core/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a>';
 var F=this.id+":flashContainer";
 var D=document.getElementById(F);
 this.isFlash=swfobject.hasFlashPlayerVersion("9.0.28");

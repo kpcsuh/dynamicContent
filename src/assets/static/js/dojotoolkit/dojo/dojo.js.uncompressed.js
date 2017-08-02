@@ -3296,7 +3296,7 @@ dojo.provide("dojo._base.declare");
 		//		Calls a super method.
 		//	name: String?
 		//		The optional method name. Should be the same as the caller's
-		//		name. Usually "name" is specified in complex dynamic cases, when
+		//		name. Usually "name" is specified in complex manual-entry cases, when
 		//		the calling method was dynamically added, undecorated by
 		//		dojo.declare, and it cannot be determined.
 		//	args: Arguments
@@ -3372,7 +3372,7 @@ dojo.provide("dojo._base.declare");
 		//		Returns a super method.
 		//	name: String?
 		//		The optional method name. Should be the same as the caller's
-		//		name. Usually "name" is specified in complex dynamic cases, when
+		//		name. Usually "name" is specified in complex manual-entry cases, when
 		//		the calling method was dynamically added, undecorated by
 		//		dojo.declare, and it cannot be determined.
 		//	args: Arguments
@@ -6003,8 +6003,8 @@ if(dojo.isIE || dojo.isOpera){
 	// Although it would be easier to read, there are not separate versions of 
 	// _getMarginBox for each browser because:
 	// 1. the branching is not expensive
-	// 2. factoring the shared code wastes cycles (function call overhead)
-	// 3. duplicating the shared code wastes bytes
+	// 2. factoring the core code wastes cycles (function call overhead)
+	// 3. duplicating the core code wastes bytes
 
 	dojo._getMarginBox = function(/*DomNode*/node, /*Object*/computedStyle){
 		// summary:

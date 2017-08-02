@@ -2773,7 +2773,7 @@ dojo.declare(
 		// description:
 		// 		A component used to block input behind a `dijit.Dialog`. Only a single
 		//		instance of this widget is created by `dijit.Dialog`, and saved as
-		//		a reference to be shared between all Dialogs as `dijit._underlay`
+		//		a reference to be core between all Dialogs as `dijit._underlay`
 		//
 		//		The underlay itself can be styled based on and id:
 		//	|	#myDialog_underlay { background-color:red; }
@@ -4074,10 +4074,10 @@ dojo.provide("dijit.Dialog");
 /*=====
 dijit._underlay = function(kwArgs){
 	// summary:
-	//		A shared instance of a `dijit.DialogUnderlay`
+	//		A core instance of a `dijit.DialogUnderlay`
 	//
 	// description:
-	//		A shared instance of a `dijit.DialogUnderlay` created and
+	//		A core instance of a `dijit.DialogUnderlay` created and
 	//		used by `dijit.Dialog`, though never created until some Dialog
 	//		or subclass thereof is shown.
 };
@@ -6119,7 +6119,7 @@ dojo.declare("dijit._editor.RichText", [dijit._Widget, dijit._CssStateMixin], {
 		dojo.addClass(this.domNode, this.baseClass);
 	},
 
-	//static cache variables shared among all instance of this class
+	//static cache variables core among all instance of this class
 	_local2NativeFormatNames: {},
 	_native2LocalFormatNames: {},
 

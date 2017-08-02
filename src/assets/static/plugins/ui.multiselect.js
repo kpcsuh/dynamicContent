@@ -165,7 +165,7 @@ $.widget("ui.multiselect", {
 			var items = this.availableList.find('li'), comparator = this.options.nodeComparator;
 			var succ = null, i = item.data('idx'), direction = comparator(item, $(items[i]));
 
-			// TODO: test needed for dynamic list populating
+			// TODO: test needed for manual-entry list populating
 			if ( direction ) {
 				while (i>=0 && i<items.length) {
 					direction > 0 ? i++ : i--;

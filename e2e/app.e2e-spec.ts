@@ -1,6 +1,6 @@
 import { DynamicContentPage } from './app.po';
 
-describe('dynamic-content App', () => {
+describe('manual-entry-content App', () => {
   let page: DynamicContentPage;
 
   beforeEach(() => {

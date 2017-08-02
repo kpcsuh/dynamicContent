@@ -53,7 +53,7 @@ dojo.window.get = function(doc){
 dojo.window.scrollIntoView = function(/*DomNode*/ node, /*Object?*/ pos){
 	// summary:
 	//		Scroll the passed node into view, if it is not already.
-	
+
 	// don't rely on node.scrollIntoView working just because the function is there
 
 	try{ // catch unexpected/unrecreatable errors (#7808) since we can recover using a semi-acceptable native method
@@ -84,7 +84,7 @@ dojo.window.scrollIntoView = function(/*DomNode*/ node, /*Object?*/ pos){
 			if(el == body){ el = scrollRoot; }
 			var elPos = dojo.position(el),
 				fixedPos = isFixed(el);
-	
+
 			if(el == scrollRoot){
 				elPos.w = rootWidth; elPos.h = rootHeight;
 				if(scrollRoot == html && isIE && rtl){ elPos.x += scrollRoot.offsetWidth-elPos.w; } // IE workaround where scrollbar causes negative x
@@ -94,7 +94,7 @@ dojo.window.scrollIntoView = function(/*DomNode*/ node, /*Object?*/ pos){
 				var pb = dojo._getPadBorderExtents(el);
 				elPos.w -= pb.w; elPos.h -= pb.h; elPos.x += pb.l; elPos.y += pb.t;
 			}
-	
+
 			if(el != scrollRoot){ // body, html sizes already have the scrollbar removed
 				var clientSize = el.clientWidth,
 					scrollBarSize = elPos.w - clientSize;
@@ -139,7 +139,7 @@ dojo.window.scrollIntoView = function(/*DomNode*/ node, /*Object?*/ pos){
 				nodePos.y -= el.scrollTop;
 			}
 			el = (el != scrollRoot) && !fixedPos && el.parentNode;
-		}	
+		}
 	}catch(error){
 		console.error('scrollIntoView: ' + error);
 		node.scrollIntoView(false);
@@ -385,7 +385,7 @@ dojo.declare("dijit.WidgetSet", null, {
 	dijit.getUniqueId = function(/*String*/widgetType){
 		// summary:
 		//		Generates a unique id for a given widgetType
-	
+
 		var id;
 		do{
 			id = widgetType + "_" +
@@ -394,14 +394,14 @@ dojo.declare("dijit.WidgetSet", null, {
 		}while(hash[id]);
 		return dijit._scopeName == "dijit" ? id : dijit._scopeName + "_" + id; // String
 	};
-	
+
 	dijit.findWidgets = function(/*DomNode*/ root){
 		// summary:
 		//		Search subtree under root returning widgets found.
 		//		Doesn't search for nested widgets (ie, widgets inside other widgets).
-	
+
 		var outAry = [];
-	
+
 		function getChildrenHelper(root){
 			for(var node = root.firstChild; node; node = node.nextSibling){
 				if(node.nodeType == 1){
@@ -414,20 +414,20 @@ dojo.declare("dijit.WidgetSet", null, {
 				}
 			}
 		}
-	
+
 		getChildrenHelper(root);
 		return outAry;
 	};
-	
+
 	dijit._destroyAll = function(){
 		// summary:
 		//		Code to destroy all widgets and do other cleanup on page unload
-	
+
 		// Clean up focus manager lingering references to widgets and nodes
 		dijit._curFocus = null;
 		dijit._prevFocus = null;
 		dijit._activeStack = [];
-	
+
 		// Destroy all the widgets, top down
 		dojo.forEach(dijit.findWidgets(dojo.body()), function(widget){
 			// Avoid double destroy of widgets like Menu that are attached to <body>
@@ -441,7 +441,7 @@ dojo.declare("dijit.WidgetSet", null, {
 			}
 		});
 	};
-	
+
 	if(dojo.isIE){
 		// Only run _destroyAll() for IE because we think it's only necessary in that case,
 		// and because it causes problems on FF.  See bug #3531 for details.
@@ -449,13 +449,13 @@ dojo.declare("dijit.WidgetSet", null, {
 			dijit._destroyAll();
 		});
 	}
-	
+
 	dijit.byNode = function(/*DOMNode*/ node){
 		// summary:
 		//		Returns the widget corresponding to the given DOMNode
 		return hash[node.getAttribute("widgetId")]; // dijit._Widget
 	};
-	
+
 	dijit.getEnclosingWidget = function(/*DOMNode*/ node){
 		// summary:
 		//		Returns the widget whose DOM tree contains the specified DOMNode, or null if
@@ -477,11 +477,11 @@ dojo.declare("dijit.WidgetSet", null, {
 			&& (s.display != "none")
 			&& (attr(elem, "type") != "hidden");
 	});
-	
+
 	dijit.hasDefaultTabStop = function(/*Element*/ elem){
 		// summary:
 		//		Tests if element is tab-navigable even without an explicit tabIndex setting
-	
+
 		// No explicit tabIndex setting, need to investigate node type
 		switch(elem.nodeName.toLowerCase()){
 			case "a":
@@ -524,11 +524,11 @@ dojo.declare("dijit.WidgetSet", null, {
 				return elem.contentEditable == 'true';
 		}
 	};
-	
+
 	var isTabNavigable = (dijit.isTabNavigable = function(/*Element*/ elem){
 		// summary:
 		//		Tests if an element is tab-navigable
-	
+
 		// TODO: convert (and rename method) to return effective tabIndex; will save time in _getTabNavigable()
 		if(attr(elem, "disabled")){
 			return false;
@@ -595,7 +595,7 @@ dojo.declare("dijit.WidgetSet", null, {
 		var elems = dijit._getTabNavigable(dojo.byId(root));
 		return elems.lowest ? elems.lowest : elems.first; // DomNode
 	};
-	
+
 	dijit.getLastInTabbingOrder = function(/*String|DOMNode*/ root){
 		// summary:
 		//		Finds the descendant of the specified root node
@@ -603,7 +603,7 @@ dojo.declare("dijit.WidgetSet", null, {
 		var elems = dijit._getTabNavigable(dojo.byId(root));
 		return elems.last ? elems.last : elems.highest; // DomNode
 	};
-	
+
 	/*=====
 	dojo.mixin(dijit, {
 		// defaultDuration: Integer
@@ -614,7 +614,7 @@ dojo.declare("dijit.WidgetSet", null, {
 		defaultDuration: 200
 	});
 	=====*/
-	
+
 	dijit.defaultDuration = dojo.config["defaultDuration"] || 200;
 
 })();
@@ -909,7 +909,7 @@ dojo.mixin(dijit, {
 		var mousedownListener = function(evt){
 			dijit._justMouseDowned = true;
 			setTimeout(function(){ dijit._justMouseDowned = false; }, 0);
-			
+
 			// workaround weird IE bug where the click is on an orphaned node
 			// (first time clicking a Select/DropDownButton inside a TooltipDialog)
 			if(dojo.isIE && evt && evt.srcElement && evt.srcElement.parentNode == null){
@@ -1179,7 +1179,7 @@ dojo.AdapterRegistry = function(/*Boolean?*/ returnWrappers){
 
 dojo.extend(dojo.AdapterRegistry, {
 	register: function(/*String*/ name, /*Function*/ check, /*Function*/ wrap, /*Boolean?*/ directReturn, /*Boolean?*/ override){
-		//	summary: 
+		//	summary:
 		//		register a check function to determine if the wrap function or
 		//		object gets selected
 		//	name:
@@ -1662,7 +1662,7 @@ dijit.popup = {
 	//		Stack of currently popped up widgets.
 	//		(someone opened _stack[0], and then it opened _stack[1], etc.)
 	_stack: [],
-	
+
 	// _beginZIndex: Number
 	//		Z-index of the first popup.   (If first popup opens other
 	//		popups they get a higher z-index.)
@@ -1859,7 +1859,7 @@ dijit.popup = {
 			}else{
 				dojo.destroy(wrapper);
 			}
-                        
+
 			if(onClose){
 				onClose();
 			}
@@ -1937,7 +1937,7 @@ dojo.extend(dijit.BackgroundIframe, {
 		// 		resize the iframe so its the same size as node
 		// description:
 		//		this function is a no-op in all browsers except
-		//		IE6, which does not support 100% width/height 
+		//		IE6, which does not support 100% width/height
 		//		of absolute positioned iframes
 		if(this.iframe && dojo.isIE<7){
 			dojo.style(this.iframe, {
@@ -1972,7 +1972,7 @@ dijit.scrollIntoView = function(/*DomNode*/ node, /*Object?*/ pos){
 	// summary:
 	//		Scroll the passed node into view, if it is not already.
 	//		Deprecated, use `dojo.window.scrollIntoView` instead.
-	
+
 	dojo.window.scrollIntoView(node, pos);
 };
 
@@ -2034,7 +2034,7 @@ dojo.provide("dojo.uacss");
 	html.className = d.trim(html.className + " " + classStr);
 
 	// If RTL mode, then add dj_rtl flag plus repeat existing classes with -rtl extension.
-	// We can't run the code below until the <body> tag has loaded (so we can check for dir=rtl).  
+	// We can't run the code below until the <body> tag has loaded (so we can check for dir=rtl).
 	// Unshift() is to run sniff code before the parser.
 	dojo._loaders.unshift(function(){
 		if(!dojo._isBodyLtr()){
@@ -2075,7 +2075,7 @@ dijit.typematic = {
 	_fireEventAndReload: function(){
 		this._timer = null;
 		this._callback(++this._count, this._node, this._evt);
-		
+
 		// Schedule next event, timer is at most minDelay (default 10ms) to avoid
 		// browser overload (particularly avoiding starving DOH robot so it never gets to send a mouseup)
 		this._currentTimeout = Math.max(
@@ -2544,7 +2544,7 @@ dojo.date.stamp.toISOString = function(/*Date*/dateObject, /*dojo.date.stamp.__O
 		}else if(options.selector != "time"){
 			var timezoneOffset = dateObject.getTimezoneOffset();
 			var absOffset = Math.abs(timezoneOffset);
-			time += (timezoneOffset > 0 ? "-" : "+") + 
+			time += (timezoneOffset > 0 ? "-" : "+") +
 				_(Math.floor(absOffset/60)) + ":" + _(absOffset%60);
 		}
 		formattedDate.push(time);
@@ -2596,7 +2596,7 @@ dojo.parser = new function(){
 			case "function":
 				if(d.isFunction(value)){
 					// IE gives us a function, even when we say something like onClick="foo"
-					// (in which case it gives us an invalid function "function(){ foo }"). 
+					// (in which case it gives us an invalid function "function(){ foo }").
 					//  Therefore, convert to string
 					value=value.toString();
 					value=d.trim(value.substring(value.indexOf('{')+1, value.length-1));
@@ -2643,8 +2643,8 @@ dojo.parser = new function(){
 		//		fully qualified name (like "dijit.form.Button")
 		// returns:
 		//		structure like
-		//			{ 
-		//				cls: dijit.Button, 
+		//			{
+		//				cls: dijit.Button,
 		//				params: { label: "string", disabled: "boolean"}
 		//			}
 
@@ -2654,7 +2654,7 @@ dojo.parser = new function(){
 			if(!cls){ return null; }		// class not defined [yet]
 
 			var proto = cls.prototype;
-	
+
 			// get table of parameter names & types
 			var params = {}, dummyClass = {};
 			for(var name in proto){
@@ -2711,7 +2711,7 @@ dojo.parser = new function(){
 		var thelist = [], dp = dojo.parser;
 		mixin = mixin||{};
 		args = args||{};
-		
+
 		d.forEach(nodes, function(obj){
 			if(!obj){ return; }
 
@@ -2730,7 +2730,7 @@ dojo.parser = new function(){
 				type = dp._attrName in mixin ? mixin[dp._attrName] : node.getAttribute(dp._attrName);
 				clsInfo = type && getClassInfo(type);
 				clazz = clsInfo && clsInfo.cls;
-				scripts = (clazz && (clazz._noScript || clazz.prototype._noScript) ? [] : 
+				scripts = (clazz && (clazz._noScript || clazz.prototype._noScript) ? [] :
 							d.query("> script[type^='dojo/']", node));
 			}
 			if(!clsInfo){
@@ -2828,9 +2828,9 @@ dojo.parser = new function(){
 			// ContentPane is the parent widget (so that the parse doesn't call startup() on the
 			// ContentPane's children)
 			d.forEach(thelist, function(instance){
-				if(	!args.noStart && instance  && 
+				if(	!args.noStart && instance  &&
 					instance.startup &&
-					!instance._started && 
+					!instance._started &&
 					(!instance.getParent || !instance.getParent())
 				){
 					instance.startup();
@@ -2852,18 +2852,18 @@ dojo.parser = new function(){
 		// rootNode: DomNode?
 		//		A default starting root node from which to start the parsing. Can be
 		//		omitted, defaulting to the entire document. If omitted, the `args`
-		//		object can be passed in this place. If the `args` object has a 
+		//		object can be passed in this place. If the `args` object has a
 		//		`rootNode` member, that is used.
 		//
 		// args:
 		//		a kwArgs object passed along to instantiate()
-		//		
+		//
 		//			* noStart: Boolean?
 		//				when set will prevent the parser from calling .startup()
-		//				when locating the nodes. 
+		//				when locating the nodes.
 		//			* rootNode: DomNode?
 		//				identical to the function's `rootNode` argument, though
-		//				allowed to be passed in via this `args object. 
+		//				allowed to be passed in via this `args object.
 		//			* inherited: Object
 		//				Hash possibly containing dir and lang settings to be applied to
 		//				parsed widgets, unless there's another setting on a sub-node that overrides
@@ -2878,7 +2878,7 @@ dojo.parser = new function(){
 		//	|		dojo.parser.parse(dojo.byId(foo));
 		//
 		// example:
-		//		Parse all classes in a page, but do not call .startup() on any 
+		//		Parse all classes in a page, but do not call .startup() on any
 		//		child
 		//	|		dojo.parser.parse({ noStart: true })
 		//
@@ -2984,9 +2984,9 @@ dojo.parser = new function(){
 //after the a11y test.
 
 (function(){
-	var parseRunner = function(){ 
+	var parseRunner = function(){
 		if(dojo.config.parseOnLoad){
-			dojo.parser.parse(); 
+			dojo.parser.parse();
 		}
 	};
 
@@ -3523,7 +3523,7 @@ dojo.declare("dijit._Widget", null, {
 		//		protected
 
 		// baseClass is a single class name or occasionally a space-separated list of names.
-		// Add those classes to the DOMNod.  If RTL mode then also add with Rtl suffix.		
+		// Add those classes to the DOMNod.  If RTL mode then also add with Rtl suffix.
 		if(this.baseClass){
 			var classes = this.baseClass.split(" ");
 			if(!this.isLeftToRight()){
@@ -3841,7 +3841,7 @@ dojo.declare("dijit._Widget", null, {
 			return this.get(name);
 		}
 	},
-	
+
 	get: function(name){
 		// summary:
 		//		Get a property from a widget.
@@ -3850,7 +3850,7 @@ dojo.declare("dijit._Widget", null, {
 		// description:
 		//		Get a named property from a widget. The property may
 		//		potentially be retrieved via a getter method. If no getter is defined, this
-		// 		just retrieves the object's property.  
+		// 		just retrieves the object's property.
 		// 		For example, if the widget has a properties "foo"
 		//		and "bar" and a method named "_getFooAttr", calling:
 		//	|	myWidget.get("foo");
@@ -3863,16 +3863,16 @@ dojo.declare("dijit._Widget", null, {
 		var names = this._getAttrNames(name);
 		return this[names.g] ? this[names.g]() : this[name];
 	},
-	
+
 	set: function(name, value){
 		// summary:
 		//		Set a property on a widget
 		//	name:
-		//		The property to set. 
+		//		The property to set.
 		//	value:
 		//		The value to set in the property.
 		// description:
-		//		Sets named properties on a widget which may potentially be handled by a 
+		//		Sets named properties on a widget which may potentially be handled by a
 		// 		setter in the widget.
 		// 		For example, if the widget has a properties "foo"
 		//		and "bar" and a method named "_setFooAttr", calling:
@@ -3893,7 +3893,7 @@ dojo.declare("dijit._Widget", null, {
 
 		if(typeof name === "object"){
 			for(var x in name){
-				this.set(x, name[x]); 
+				this.set(x, name[x]);
 			}
 			return this;
 		}
@@ -3912,8 +3912,8 @@ dojo.declare("dijit._Widget", null, {
 		}
 		return result || this;
 	},
-	
-	_attrPairNames: {},		// shared between all widgets
+
+	_attrPairNames: {},		// core between all widgets
 	_getAttrNames: function(name){
 		// summary:
 		//		Helper function for get() and set().
@@ -4203,7 +4203,7 @@ dojo._hasResource["dojo.string"] = true;
 dojo.provide("dojo.string");
 
 /*=====
-dojo.string = { 
+dojo.string = {
 	// summary: String utilities for Dojo
 };
 =====*/
@@ -4215,9 +4215,9 @@ dojo.string.rep = function(/*String*/str, /*Integer*/num){
 	//		the string to replicate
 	//	num:
 	//		number of times to replicate the string
-	
+
 	if(num <= 0 || !str){ return ""; }
-	
+
 	var buf = [];
 	for(;;){
 		if(num & 1){
@@ -4254,22 +4254,22 @@ dojo.string.pad = function(/*String*/text, /*Integer*/size, /*String?*/ch, /*Boo
 	return end ? out + pad : pad + out;	// String
 };
 
-dojo.string.substitute = function(	/*String*/		template, 
-									/*Object|Array*/map, 
-									/*Function?*/	transform, 
+dojo.string.substitute = function(	/*String*/		template,
+									/*Object|Array*/map,
+									/*Function?*/	transform,
 									/*Object?*/		thisObject){
 	//	summary:
 	//		Performs parameterized substitutions on a string. Throws an
 	//		exception if any parameter is unmatched.
-	//	template: 
+	//	template:
 	//		a string with expressions in the form `${key}` to be replaced or
-	//		`${key:format}` which specifies a format function. keys are case-sensitive. 
+	//		`${key:format}` which specifies a format function. keys are case-sensitive.
 	//	map:
 	//		hash to search for substitutions
-	//	transform: 
+	//	transform:
 	//		a function to process all parameters before substitution takes
 	//		place, e.g. mylib.encodeXML
-	//	thisObject: 
+	//	thisObject:
 	//		where to look for optional format function; default to the global
 	//		namespace
 	//	example:
@@ -4312,7 +4312,7 @@ dojo.string.substitute = function(	/*String*/		template,
 	//	|	);
 
 	thisObject = thisObject || dojo.global;
-	transform = transform ? 
+	transform = transform ?
 		dojo.hitch(thisObject, transform) : function(v){ return v; };
 
 	return template.replace(/\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g,
@@ -4361,7 +4361,7 @@ dojo._hasResource["dojo.cache"] = true;
 dojo.provide("dojo.cache");
 
 /*=====
-dojo.cache = { 
+dojo.cache = {
 	// summary:
 	// 		A way to cache string content that is fetchable via `dojo.moduleUrl`.
 };
@@ -4406,7 +4406,7 @@ dojo.cache = {
 		//		|	var text = dojo["cache"]("my.module", "template.html");
 		//	example:
 		//		To ask dojo.cache to fetch content and store it in the cache, and sanitize the input
-		// 		 (the dojo["cache"] style of call is used to avoid an issue with the build system 
+		// 		 (the dojo["cache"] style of call is used to avoid an issue with the build system
 		// 		erroneously trying to intern this example. To get the build system to intern your
 		// 		dojo.cache calls, use the "dojo.cache" style of call):
 		// 		|	//If template.html contains "<html><body><h1>Hello</h1></body></html>", the
@@ -4456,7 +4456,7 @@ dojo.cache = {
 	};
 
 	dojo.cache._sanitize = function(/*String*/val){
-		// summary: 
+		// summary:
 		//		Strips <?xml ...?> declarations so that external SVG and XML
 		// 		documents can be added to a document without worry. Also, if the string
 		//		is an HTML document, only the part inside the body tag is returned.
@@ -5346,7 +5346,7 @@ dojo.declare("dijit._CssStateMixin", [], {
 		dojo.forEach(["onmouseenter", "onmouseleave", "onmousedown"], function(e){
 			this.connect(this.domNode, e, "_cssMouseEvent");
 		}, this);
-		
+
 		// Monitoring changes to disabled, readonly, etc. state, and update CSS class of root node
 		this.connect(this, "set", function(name, value){
 			if(arguments.length >= 2 && {disabled: true, readOnly: true, checked:true, selected:true}[name]){
@@ -5663,7 +5663,7 @@ dojo.declare("dijit.form._FormWidget", [dijit._Widget, dijit._Templated, dijit._
 				if(dojo.isWebKit || dijit.hasDefaultTabStop(node)){	// see #11064 about webkit bug
 					node.setAttribute('tabIndex', "-1");
 				}else{
-					node.removeAttribute('tabIndex');				
+					node.removeAttribute('tabIndex');
 				}
 			}, this);
 		}else{
@@ -5791,7 +5791,7 @@ dojo.declare("dijit.form._FormWidget", [dijit._Widget, dijit._Templated, dijit._
 		dojo.deprecated(this.declaredClass+"::getValue() is deprecated. Use get('value') instead.", "", "2.0");
 		return this.get('value');
 	},
-	
+
 	_onMouseDown: function(e){
 		// If user clicks on the button, even if the mouse is released outside of it,
 		// this button should get focus (to mimics native browser buttons).
@@ -6070,7 +6070,7 @@ dojo.declare("dijit._KeyNavContainer",
 			//		last one instead of the first one
 			// tags:
 			//		protected
-			
+
 			if(this.focusedChild && widget !== this.focusedChild){
 				this._onChildBlur(this.focusedChild);
 			}
@@ -6082,13 +6082,13 @@ dojo.declare("dijit._KeyNavContainer",
 			// summary:
 			//		Setup for each child widget
 			// description:
-			//		Sets tabIndex=-1 on each child, so that the tab key will 
+			//		Sets tabIndex=-1 on each child, so that the tab key will
 			//		leave the container rather than visiting each child.
 			// tags:
 			//		private
-			
+
 			widget.set("tabIndex", "-1");
-			
+
 			this.connect(widget, "_onFocus", function(){
 				// Set valid tabIndex so tabbing away from widget goes to right place, see #10272
 				widget.set("tabIndex", this.tabIndex);
@@ -7029,7 +7029,7 @@ dojo.declare("dijit.Menu",
 				win = this._iframeContentWindow(iframe);
 			cn = dojo.withGlobal(win, dojo.body);
 		}else{
-			
+
 			// To capture these events at the top level, attach to <html>, not <body>.
 			// Otherwise right-click context menu just doesn't work.
 			cn = (node == dojo.body() ? dojo.doc.documentElement : node);
@@ -7066,7 +7066,7 @@ dojo.declare("dijit.Menu",
 						this._scheduleOpen(evt.target, iframe);	// no coords - open near target node
 					}
 				})
-			];	
+			];
 		});
 		binding.connects = cn ? doConnects(cn) : [];
 
@@ -7181,7 +7181,7 @@ dojo.declare("dijit.Menu",
 					ifc = dojo.position(iframe, true),
 					win = this._iframeContentWindow(iframe),
 					scroll = dojo.withGlobal(win, "_docScroll", dojo);
-	
+
 				var cs = dojo.getComputedStyle(iframe),
 					tp = dojo._toPixelValue,
 					left = (dojo.isIE && dojo.isQuirks ? 0 : tp(iframe, cs.paddingLeft)) + (dojo.isIE && dojo.isQuirks ? tp(iframe, cs.borderLeftWidth) : 0),
@@ -7256,13 +7256,13 @@ dojo.provide("dojox.html.metrics");
 			'1em':0, '1ex':0, '100%':0, '12pt':0, '16px':0, 'xx-small':0, 'x-small':0,
 			'small':0, 'medium':0, 'large':0, 'x-large':0, 'xx-large':0
 		};
-	
+
 		if(dojo.isIE){
 			//	we do a font-size fix if and only if one isn't applied already.
 			//	NOTE: If someone set the fontSize on the HTML Element, this will kill it.
 			dojo.doc.documentElement.style.fontSize="100%";
 		}
-	
+
 		//	set up the measuring node.
 		var div=dojo.doc.createElement("div");
 		var ds = div.style;
@@ -7278,20 +7278,20 @@ dojo.provide("dojox.html.metrics");
 		ds.lineHeight="1";
 		ds.overflow="hidden";
 		dojo.body().appendChild(div);
-	
+
 		//	do the measurements.
 		for(var p in heights){
 			ds.fontSize = p;
 			heights[p] = Math.round(div.offsetHeight * 12/16) * 16/12 / 1000;
 		}
-		
+
 		dojo.body().removeChild(div);
 		div = null;
 		return heights; 	//	object
 	};
 
 	var fontMeasurements = null;
-	
+
 	dhm.getCachedFontMeasurements = function(recalculate){
 		if(recalculate || !fontMeasurements){
 			fontMeasurements = dhm.getFontMeasurements();
@@ -7306,7 +7306,7 @@ dojo.provide("dojox.html.metrics");
 			m = measuringNode = dojo.doc.createElement("div");
 			// Container that we can set contraints on so that it doesn't
 			// trigger a scrollbar.
-			var c = dojo.doc.createElement("div"); 
+			var c = dojo.doc.createElement("div");
 			c.appendChild(m);
 			s = c.style;
 			s.overflow='scroll';
@@ -7439,7 +7439,7 @@ dojo.provide("dojox.grid.util");
 		var fn = ob && ev && ob[ev];
 		return fn && (args ? fn.apply(ob, args) : ob[ev]());
 	};
-	
+
 	dgu.setStyleHeightPx = function(inElement, inHeight){
 		if(inHeight >= 0){
 			var s = inElement.style;
@@ -7449,7 +7449,7 @@ dojo.provide("dojox.grid.util");
 			}
 		}
 	};
-	
+
 	dgu.mouseEvents = [ 'mouseover', 'mouseout', /*'mousemove',*/ 'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu' ];
 
 	dgu.keyEvents = [ 'keyup', 'keydown', 'keypress' ];
@@ -7466,14 +7466,14 @@ dojo.provide("dojox.grid.util");
 		inNode && inNode.parentNode && inNode.parentNode.removeChild(inNode);
 		return inNode;
 	};
-	
+
 	dgu.arrayCompare = function(inA, inB){
 		for(var i=0,l=inA.length; i<l; i++){
 			if(inA[i] != inB[i]){return false;}
 		}
 		return (inA.length == inB.length);
 	};
-	
+
 	dgu.arrayInsert = function(inArray, inIndex, inValue){
 		if(inArray.length <= inIndex){
 			inArray[inIndex] = inValue;
@@ -7481,11 +7481,11 @@ dojo.provide("dojox.grid.util");
 			inArray.splice(inIndex, 0, inValue);
 		}
 	};
-	
+
 	dgu.arrayRemove = function(inArray, inIndex){
 		inArray.splice(inIndex, 1);
 	};
-	
+
 	dgu.arraySwap = function(inArray, inI, inJ){
 		var cache = inArray[inI];
 		inArray[inI] = inArray[inJ];
@@ -7509,7 +7509,7 @@ dojo.provide("dojox.grid._Scroller");
 		}
 		return -1;
 	};
-	
+
 	var cleanNode = function(inNode){
 		if(!inNode){
 			return;
@@ -7528,7 +7528,7 @@ dojo.provide("dojox.grid._Scroller");
 		var node = dojo.byId(inNodeOrId);
 		return (node && node.tagName ? node.tagName.toLowerCase() : '');
 	};
-	
+
 	var nodeKids = function(inNode, inTag){
 		var result = [];
 		var i=0, n;
@@ -7540,7 +7540,7 @@ dojo.provide("dojox.grid._Scroller");
 		}
 		return result;
 	};
-	
+
 	var divkids = function(inNode){
 		return nodeKids(inNode, 'div');
 	};
@@ -7652,7 +7652,7 @@ dojo.provide("dojox.grid._Scroller");
 				return ((inPageIndex + 1) * this.rowsPerPage > this.rowCount ?
 					this.rowCount - inPageIndex * this.rowsPerPage :
 					this.rowsPerPage) * height;
-					 
+
 			}
 			var n = this.getDefaultPageNode(inPageIndex);
 			return (n && n.innerHTML) ? n.offsetHeight : undefined;
@@ -7754,7 +7754,7 @@ dojo.provide("dojox.grid._Scroller");
 				//and see header in empty grid.
 				dojox.grid.util.setStyleHeightPx(this.contentNodes[i], Math.max(1,this.height));
 			}
-			
+
 			// Calculate the average row height and update the defaults (row and page).
 			var needPage = (!this._invalidating);
 			if(!needPage){
@@ -8026,7 +8026,7 @@ dojo.declare("dojox.grid._DeferredTextWidget", dijit._Widget, {
 		}catch(e){// IE sux bad
 		}
 	};
-	
+
 	var whenIdle = function(/*inContext, inMethod, args ...*/){
 		setTimeout(dojo.hitch.apply(dojo, arguments), 0);
 	};
@@ -8087,7 +8087,7 @@ dojo.declare("dojox.grid._DeferredTextWidget", dijit._Widget, {
 			}
 			return v;
 		},
-		
+
 		// data source
 		format: function(inRowIndex, inItem){
 			// summary:
@@ -8562,11 +8562,11 @@ dojo.dnd.autoScrollNodes = function(e){
 			if(s.overflow.toLowerCase() in dojo.dnd._validOverflow){
 				var b = dojo._getContentBox(n, s), t = dojo.position(n, true);
 				//console.log(b.l, b.t, t.x, t.y, n.scrollLeft, n.scrollTop);
-				var w = Math.min(dojo.dnd.H_TRIGGER_AUTOSCROLL, b.w / 2), 
+				var w = Math.min(dojo.dnd.H_TRIGGER_AUTOSCROLL, b.w / 2),
 					h = Math.min(dojo.dnd.V_TRIGGER_AUTOSCROLL, b.h / 2),
 					rx = e.pageX - t.x, ry = e.pageY - t.y, dx = 0, dy = 0;
 				if(dojo.isWebKit || dojo.isOpera){
-					// FIXME: this code should not be here, it should be taken into account 
+					// FIXME: this code should not be here, it should be taken into account
 					// either by the event fixing code, or the dojo.position()
 					// FIXME: this code doesn't work on Opera 9.5 Beta
 					rx += dojo.body().scrollLeft, ry += dojo.body().scrollTop;
@@ -8613,7 +8613,7 @@ dojo.provide("dojo.dnd.Mover");
 dojo.declare("dojo.dnd.Mover", null, {
 	constructor: function(node, e, host){
 		// summary:
-		//		an object, which makes a node follow the mouse. 
+		//		an object, which makes a node follow the mouse.
 		//		Used as a default mover, and as a base class for custom movers.
 		// node: Node
 		//		a node (or node's id) to be moved
@@ -8626,7 +8626,7 @@ dojo.declare("dojo.dnd.Mover", null, {
 		this.node = dojo.byId(node);
 		this.marginBox = {l: e.pageX, t: e.pageY};
 		this.mouseButton = e.button;
-		var h = this.host = host, d = node.ownerDocument, 
+		var h = this.host = host, d = node.ownerDocument,
 			firstEvent = dojo.connect(d, "onmousemove", this, "onFirstMove");
 		this.events = [
 			dojo.connect(d, "onmousemove", this, "onMouseMove"),
@@ -8653,7 +8653,7 @@ dojo.declare("dojo.dnd.Mover", null, {
 		dojo.stopEvent(e);
 	},
 	onMouseUp: function(e){
-		if(dojo.isWebKit && dojo.isMac && this.mouseButton == 2 ? 
+		if(dojo.isWebKit && dojo.isMac && this.mouseButton == 2 ?
 				e.button == 0 : this.mouseButton == e.button){
 			this.destroy();
 		}
@@ -8662,7 +8662,7 @@ dojo.declare("dojo.dnd.Mover", null, {
 	// utilities
 	onFirstMove: function(e){
 		// summary:
-		//		makes the node absolute; it is meant to be called only once. 
+		//		makes the node absolute; it is meant to be called only once.
 		// 		relative and absolutely positioned nodes are assumed to use pixel units
 		var s = this.node.style, l, t, h = this.host;
 		switch(s.position){
@@ -8682,7 +8682,7 @@ dojo.declare("dojo.dnd.Mover", null, {
 				// space into account - so we need to subtract the combined
 				// padding and margin.  We use getComputedStyle and
 				// _getMarginBox/_getContentBox to avoid the extra lookup of
-				// the computed style. 
+				// the computed style.
 				var b = dojo.doc.body;
 				var bs = dojo.getComputedStyle(b);
 				var bm = dojo._getMarginBox(b, bs);
@@ -8746,7 +8746,7 @@ dojo.declare("dojo.dnd.Moveable", null, {
 	handle: "",
 	delay: 0,
 	skip: false,
-	
+
 	constructor: function(node, params){
 		// summary:
 		//		an object, which makes a node moveable
@@ -8781,7 +8781,7 @@ dojo.declare("dojo.dnd.Moveable", null, {
 		dojo.forEach(this.events, dojo.disconnect);
 		this.events = this.node = this.handle = null;
 	},
-	
+
 	// mouse event processors
 	onMouseDown: function(e){
 		// summary:
@@ -8831,7 +8831,7 @@ dojo.declare("dojo.dnd.Moveable", null, {
 			dojo.stopEvent(e);
 		}
 	},
-	
+
 	// local events
 	onDragDetected: function(/* Event */ e){
 		// summary:
@@ -8843,8 +8843,8 @@ dojo.declare("dojo.dnd.Moveable", null, {
 		// summary:
 		//		called before every move operation
 		dojo.publish("/dnd/move/start", [mover]);
-		dojo.addClass(dojo.body(), "dojoMove"); 
-		dojo.addClass(this.node, "dojoMoveItem"); 
+		dojo.addClass(dojo.body(), "dojoMove");
+		dojo.addClass(this.node, "dojoMoveItem");
 	},
 	onMoveStop: function(/* dojo.dnd.Mover */ mover){
 		// summary:
@@ -8857,7 +8857,7 @@ dojo.declare("dojo.dnd.Moveable", null, {
 		// summary:
 		//		called during the very first move notification;
 		//		can be used to initialize coordinates, can be overwritten.
-		
+
 		// default implementation does nothing
 	},
 	onMove: function(/* dojo.dnd.Mover */ mover, /* Object */ leftTop, /* Event */ e){
@@ -8873,13 +8873,13 @@ dojo.declare("dojo.dnd.Moveable", null, {
 	onMoving: function(/* dojo.dnd.Mover */ mover, /* Object */ leftTop){
 		// summary:
 		//		called before every incremental move; can be overwritten.
-		
+
 		// default implementation does nothing
 	},
 	onMoved: function(/* dojo.dnd.Mover */ mover, /* Object */ leftTop){
 		// summary:
 		//		called after every incremental move; can be overwritten.
-		
+
 		// default implementation does nothing
 	}
 });
@@ -8899,11 +8899,11 @@ dojo.provide("dojox.grid._Builder");
 	var getTdIndex = function(td){
 		return td.cellIndex >=0 ? td.cellIndex : dojo.indexOf(td.parentNode.cells, td);
 	};
-	
+
 	var getTrIndex = function(tr){
 		return tr.rowIndex >=0 ? tr.rowIndex : dojo.indexOf(tr.parentNode.childNodes, tr);
 	};
-	
+
 	var getTr = function(rowOwner, index){
 		return rowOwner && ((rowOwner.rows||0)[index] || rowOwner.childNodes[index]);
 	};
@@ -8912,12 +8912,12 @@ dojo.provide("dojox.grid._Builder");
 		for(var n=node; n && n.tagName!='TABLE'; n=n.parentNode){}
 		return n;
 	};
-	
+
 	var ascendDom = function(inNode, inWhile){
 		for(var n=inNode; n && inWhile(n); n=n.parentNode){}
 		return n;
 	};
-	
+
 	var makeNotTagName = function(inTagName){
 		var name = inTagName.toUpperCase();
 		return function(node){ return node.tagName != name; };
@@ -8946,7 +8946,7 @@ dojo.provide("dojox.grid._Builder");
 			html.push('>');
 			return html;
 		},
-		
+
 		// generate starting tags for a cell
 		generateCellMarkup: function(inCell, inMoreStyles, inMoreClasses, isHeader){
 			var result = [], html;
@@ -8979,7 +8979,7 @@ dojo.provide("dojox.grid._Builder");
 			}
 			// result[0] => td opener, style
 			result.push(html.join(''));
-			// SLOT: result[1] => td classes 
+			// SLOT: result[1] => td classes
 			result.push('');
 			html = ['" idx="', inCell.index, '" style="'];
 			if(inMoreStyles && inMoreStyles[inMoreStyles.length-1] != ';'){
@@ -8991,7 +8991,7 @@ dojo.provide("dojox.grid._Builder");
 			}
 			// result[2] => markup
 			result.push(html.join(''));
-			// SLOT: result[3] => td style 
+			// SLOT: result[3] => td style
 			result.push('');
 			html = [ '"' ];
 			if(inCell.attrs){
@@ -9011,11 +9011,11 @@ dojo.provide("dojox.grid._Builder");
 		isCellNode: function(inNode){
 			return Boolean(inNode && inNode!=dojo.doc && dojo.attr(inNode, "idx"));
 		},
-		
+
 		getCellNodeIndex: function(inCellNode){
 			return inCellNode ? Number(dojo.attr(inCellNode, "idx")) : -1;
 		},
-		
+
 		getCellNode: function(inRowNode, inCellIndex){
 			for(var i=0, row; (row=getTr(inRowNode.firstChild, i)); i++){
 				for(var j=0, cell; (cell=row.cells[j]); j++){
@@ -9026,7 +9026,7 @@ dojo.provide("dojox.grid._Builder");
 			}
 			return null;
 		},
-		
+
 		findCellTarget: function(inSourceNode, inTopNode){
 			var n = inSourceNode;
 			while(n && (!this.isCellNode(n) || (n.offsetParent && gridViewTag in n.offsetParent.parentNode && n.offsetParent.parentNode[gridViewTag] != this.view.id)) && (n!=inTopNode)){
@@ -9034,7 +9034,7 @@ dojo.provide("dojox.grid._Builder");
 			}
 			return n!=inTopNode ? n : null;
 		},
-		
+
 		// event decoration
 		baseDecorateEvent: function(e){
 			e.dispatch = 'do' + e.type;
@@ -9044,14 +9044,14 @@ dojo.provide("dojox.grid._Builder");
 			e.cellIndex = this.getCellNodeIndex(e.cellNode);
 			e.cell = (e.cellIndex >= 0 ? this.grid.getCell(e.cellIndex) : null);
 		},
-		
+
 		// event dispatch
 		findTarget: function(inSource, inTag){
 			var n = inSource;
 			while(n && (n!=this.domNode) && (!(inTag in n) || (gridViewTag in n && n[gridViewTag] != this.view.id))){
 				n = n.parentNode;
 			}
-			return (n != this.domNode) ? n : null; 
+			return (n != this.domNode) ? n : null;
 		},
 
 		findRowTarget: function(inSource){
@@ -9070,7 +9070,7 @@ dojo.provide("dojox.grid._Builder");
 		isIntraRowEvent: function(e){
 			try{
 				var row = e.relatedTarget && this.findRowTarget(e.relatedTarget);
-				return !row && (e.rowIndex==-1) || row && (e.rowIndex==row.gridRowIndex);			
+				return !row && (e.rowIndex==-1) || row && (e.rowIndex==row.gridRowIndex);
 			}catch(x){
 				// e.relatedTarget on INPUT has permission problem in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=208427
 				return false;
@@ -9102,7 +9102,7 @@ dojo.provide("dojox.grid._Builder");
 				}
 			}
 		},
-		
+
 		domousedown: function(e){
 			if (e.cellNode)
 				this.grid.onMouseDown(e);
@@ -9110,7 +9110,7 @@ dojo.provide("dojox.grid._Builder");
 		}
 	});
 
-	// Produces html for grid data content. Owned by grid and used internally 
+	// Produces html for grid data content. Owned by grid and used internally
 	// for rendering data. Override to implement custom rendering.
 	dg._ContentBuilder = dojo.extend(function(view){
 		dg._Builder.call(this, view);
@@ -9174,7 +9174,7 @@ dojo.provide("dojox.grid._Builder");
 		}
 	});
 
-	// Produces html for grid header content. Owned by grid and used internally 
+	// Produces html for grid header content. Owned by grid and used internally
 	// for rendering data. Override to implement custom rendering.
 	dg._HeaderBuilder = dojo.extend(function(view){
 		this.moveable = null;
@@ -9183,7 +9183,7 @@ dojo.provide("dojox.grid._Builder");
 		_skipBogusClicks: false,
 		overResizeWidth: 4,
 		minColWidth: 1,
-		
+
 		update: function(){
 			if(this.tableMap){
 				this.tableMap.mapRows(this.view.structure.cells);
@@ -9194,7 +9194,7 @@ dojo.provide("dojox.grid._Builder");
 
 		generateHtml: function(inGetValue, inValue){
 			var html = this.getTableArray(), cells = this.view.structure.cells;
-			
+
 			dojox.grid.util.fire(this.view, "onBeforeRow", [-1, cells]);
 			for(var j=0, row; (row=cells[j]); j++){
 				if(row.hidden){
@@ -9287,7 +9287,7 @@ dojo.provide("dojox.grid._Builder");
 			if(!e.cellNode || e.cellNode.colSpan > 1){
 				return false;
 			}
-			var cell = this.grid.getCell(e.cellIndex); 
+			var cell = this.grid.getCell(e.cellIndex);
 			return !cell.noresize && cell.canResize();
 		},
 
@@ -9298,11 +9298,11 @@ dojo.provide("dojox.grid._Builder");
 			}
 			//Bugfix for crazy IE problem (#8807).  IE returns position information for the icon and text arrow divs
 			//as if they were still on the left instead of returning the position they were 'float: right' to.
-			//So, the resize check ends up checking the wrong adjacent cell.  This checks to see if the hover was over 
+			//So, the resize check ends up checking the wrong adjacent cell.  This checks to see if the hover was over
 			//the image or text nodes, then just ignored them/treat them not in scale range.
 			if(dojo.isIE){
 				var tN = e.target;
-				if(dojo.hasClass(tN, "dojoxGridArrowButtonNode") || 
+				if(dojo.hasClass(tN, "dojoxGridArrowButtonNode") ||
 					dojo.hasClass(tN, "dojoxGridArrowButtonChar")){
 					return false;
 				}
@@ -9322,11 +9322,11 @@ dojo.provide("dojox.grid._Builder");
 			}
 			//Bugfix for crazy IE problem (#8807).  IE returns position information for the icon and text arrow divs
 			//as if they were still on the left instead of returning the position they were 'float: right' to.
-			//So, the resize check ends up checking the wrong adjacent cell.  This checks to see if the hover was over 
+			//So, the resize check ends up checking the wrong adjacent cell.  This checks to see if the hover was over
 			//the image or text nodes, then just ignored them/treat them not in scale range.
 			if(dojo.isIE){
 				var tN = e.target;
-				if(dojo.hasClass(tN, "dojoxGridArrowButtonNode") || 
+				if(dojo.hasClass(tN, "dojoxGridArrowButtonNode") ||
 					dojo.hasClass(tN, "dojoxGridArrowButtonChar")){
 					return false;
 				}
@@ -9385,8 +9385,8 @@ dojo.provide("dojox.grid._Builder");
 			// Called with mouse event in case of drag and drop,
 			// Also called from keyboard shift-arrow event when focus is on a header
 			var headContentBox = dojo.contentBox(e.sourceView.headerNode);
-			
-			if(isMouse){  //IE draws line even with no mouse down so separate from keyboard 
+
+			if(isMouse){  //IE draws line even with no mouse down so separate from keyboard
 				this.lineDiv = document.createElement('div');
 
 				// NOTE: this is for backwards compatibility with Dojo 1.3
@@ -9396,7 +9396,7 @@ dojo.provide("dojox.grid._Builder");
 				var l = e.clientX;
 				if(!dojo._isBodyLtr() && dojo.isIE < 8){
 					l -= dojox.html.metrics.getScrollbar().w;
-				}				
+				}
 				dojo.style(this.lineDiv, {
 					top: vw.y + "px",
 					left: l + "px",
@@ -9470,9 +9470,9 @@ dojo.provide("dojox.grid._Builder");
 				vw: inDrag.vw + changeX,
 				tw: inDrag.tw + changeX
 			};
-			
+
 			this.dragRecord = {inDrag: inDrag, mover: mover, leftTop:leftTop};
-			
+
 			if(data.w >= this.minColWidth){
 				if (!mover) { // we are using keyboard do immediate resize
 					this.doResizeNow(inDrag, data);
@@ -9503,7 +9503,7 @@ dojo.provide("dojox.grid._Builder");
 				// Only resize the columns when the drag has finished
 				this.doResizeNow(inDrag, data);
 			}
-			
+
 			dojo.destroy(this.lineDiv);
  			dojo.destroy(this.moverDiv);
 			dojo.destroy(this.moverDiv);
@@ -9527,7 +9527,7 @@ dojo.provide("dojox.grid._Builder");
 				s.node.style.width = sw + 'px';
 				inDrag.view.setColWidth(s.index, sw);
 			}
-			if(dojo._isBodyLtr() || !dojo.isIE){//fix #11339			
+			if(dojo._isBodyLtr() || !dojo.isIE){//fix #11339
 				for(i=0; (f=inDrag.followers[i]); i++){
 					fl = f.left + data.deltaX;
 					f.node.style.left = fl + 'px';
@@ -9602,13 +9602,13 @@ dojo.provide("dojox.grid._Builder");
 			}
 			return { j: -1, i: -1 };
 		},
-		
+
 		getNode: function(inTable, inRow, inCol){
 			// summary: Find a node in inNode's table with the given structure coords
 			var row = inTable && inTable.rows[inRow];
 			return row && row.cells[inCol];
 		},
-		
+
 		_findOverlappingNodes: function(inTable, inRow, inCol){
 			var nodes = [];
 			var m = this.getMapCoords(inRow, inCol);
@@ -9623,7 +9623,7 @@ dojo.provide("dojox.grid._Builder");
 			//console.log(nodes);
 			return nodes;
 		},
-		
+
 		findOverlappingNodes: function(inNode){
 			return this._findOverlappingNodes(findTable(inNode), getTrIndex(inNode.parentNode), getTdIndex(inNode));
 		}
@@ -9682,7 +9682,7 @@ dojo.dnd.Item = function(){
 	//		If the drag object's type is "text" then data is a String,
 	//		if it's another type then data could be a different Object,
 	//		perhaps a name/value hash.
-	
+
 	this.type = type;
 	this.data = data;
 }
@@ -9690,23 +9690,23 @@ dojo.dnd.Item = function(){
 
 dojo.declare("dojo.dnd.Container", null, {
 	// summary:
-	//		a Container object, which knows when mouse hovers over it, 
+	//		a Container object, which knows when mouse hovers over it,
 	//		and over which element it hovers
-	
+
 	// object attributes (for markup)
 	skipForm: false,
-	
+
 	/*=====
 	// current: DomNode
 	//		The DOM node the mouse is currently hovered over
 	current: null,
-	
+
 	// map: Hash<String, dojo.dnd.Item>
 	//		Map from an item's id (which is also the DOMNode's id) to
 	//		the dojo.dnd.Item itself.
 	map: {},
 	=====*/
-	
+
 	constructor: function(node, params){
 		// summary:
 		//		a constructor of the Container
@@ -9719,7 +9719,7 @@ dojo.declare("dojo.dnd.Container", null, {
 		this.creator = params.creator || null;
 		this.skipForm = params.skipForm;
 		this.parent = params.dropParent && dojo.byId(params.dropParent);
-		
+
 		// class-specific variables
 		this.map = {};
 		this.current = null;
@@ -9727,7 +9727,7 @@ dojo.declare("dojo.dnd.Container", null, {
 		// states
 		this.containerState = "";
 		dojo.addClass(this.node, "dojoDndContainer");
-		
+
 		// mark up children
 		if(!(params && params._skipStartup)){
 			this.startup();
@@ -9742,13 +9742,13 @@ dojo.declare("dojo.dnd.Container", null, {
 			dojo.connect(this.node, "onselectstart", this, "onSelectStart")
 		];
 	},
-	
+
 	// object attributes (for markup)
 	creator: function(){
 		// summary:
 		//		creator function, dummy at the moment
 	},
-	
+
 	// abstract access to the map
 	getItem: function(/*String*/ key){
 		// summary:
@@ -9767,7 +9767,7 @@ dojo.declare("dojo.dnd.Container", null, {
 	},
 	forInItems: function(/*Function*/ f, /*Object?*/ o){
 		// summary:
-		//		iterates over a data map skipping members that 
+		//		iterates over a data map skipping members that
 		//		are present in the empty object (IE and/or 3rd-party libraries).
 		o = o || dojo.global;
 		var m = this.map, e = dojo.dnd._empty;
@@ -9782,7 +9782,7 @@ dojo.declare("dojo.dnd.Container", null, {
 		//		removes all data items from the map
 		this.map = {};
 	},
-	
+
 	// methods
 	getAllNodes: function(){
 		// summary:
@@ -9864,7 +9864,7 @@ dojo.declare("dojo.dnd.Container", null, {
 	startup: function(){
 		// summary:
 		//		collects valid child items and populate the map
-		
+
 		// set up the real parent node
 		if(!this.parent){
 			// use the standard algorithm, if not assigned
@@ -9934,7 +9934,7 @@ dojo.declare("dojo.dnd.Container", null, {
 			dojo.stopEvent(e);
 		}
 	},
-	
+
 	// utilities
 	onOverEvent: function(){
 		// summary:
@@ -10002,7 +10002,7 @@ dojo.declare("dojo.dnd.Container", null, {
 
 dojo.dnd._createNode = function(tag){
 	// summary:
-	//		returns a function, which creates an element of given tag 
+	//		returns a function, which creates an element of given tag
 	//		(SPAN by default) and sets its innerHTML to given text
 	// tag: String
 	//		a tag name or empty for SPAN
@@ -10094,7 +10094,7 @@ dojo.declare("dojo.dnd.__SelectorArgs", [dojo.dnd.__ContainerArgs], {
 dojo.declare("dojo.dnd.Selector", dojo.dnd.Container, {
 	// summary:
 	//		a Selector object, which knows how to select its children
-	
+
 	/*=====
 	// selection: Set<String>
 	//		The set of id's that are currently selected, such that this.selection[id] == 1
@@ -10122,10 +10122,10 @@ dojo.declare("dojo.dnd.Selector", dojo.dnd.Container, {
 			dojo.connect(this.node, "onmousedown", this, "onMouseDown"),
 			dojo.connect(this.node, "onmouseup",   this, "onMouseUp"));
 	},
-	
+
 	// object attributes (for markup)
 	singular: false,	// is singular property
-	
+
 	// methods
 	getSelectedNodes: function(){
 		// summary:
@@ -10180,16 +10180,16 @@ dojo.declare("dojo.dnd.Selector", dojo.dnd.Container, {
 	sync: function(){
 		// summary:
 		//		sync up the node list with the data map
-		
+
 		dojo.dnd.Selector.superclass.sync.call(this);
-		
+
 		// fix the anchor
 		if(this.anchor){
 			if(!this.getItem(this.anchor.id)){
 				this.anchor = null;
 			}
 		}
-		
+
 		// fix the selection
 		var t = [], e = dojo.dnd._empty;
 		for(var i in this.selection){
@@ -10201,7 +10201,7 @@ dojo.declare("dojo.dnd.Selector", dojo.dnd.Container, {
 		dojo.forEach(t, function(i){
 			delete this.selection[i];
 		}, this);
-		
+
 		return this;	// self
 	},
 	insertNodes: function(addSelected, data, before, anchor){
@@ -10359,7 +10359,7 @@ dojo.declare("dojo.dnd.Selector", dojo.dnd.Container, {
 		//		mouse event
 		this.simpleSelection = false;
 	},
-	
+
 	// utilities
 	onOverEvent: function(){
 		// summary:
@@ -10483,7 +10483,7 @@ dojo.declare("dojo.dnd.Avatar", null, {
 			var icon = dojo.byId("a11yIcon");
 			var text = '+';   // assume canDrop && copy
 			if (this.manager.canDropFlag && !this.manager.copy) {
-				text = '< '; // canDrop && move 
+				text = '< '; // canDrop && move
 			}else if (!this.manager.canDropFlag && !this.manager.copy) {
 				text = "o"; //!canDrop && move
 			}else if(!this.manager.canDropFlag){
@@ -10529,7 +10529,7 @@ dojo.declare("dojo.dnd.Manager", null, {
 	// avatar's offset from the mouse
 	OFFSET_X: 16,
 	OFFSET_Y: 16,
-	
+
 	// methods
 	overSource: function(source){
 		// summary:
@@ -10584,7 +10584,7 @@ dojo.declare("dojo.dnd.Manager", null, {
 			dojo.connect(dojo.body(), "onselectstart", dojo.stopEvent)
 		];
 		var c = "dojoDnd" + (copy ? "Copy" : "Move");
-		dojo.addClass(dojo.body(), c); 
+		dojo.addClass(dojo.body(), c);
 	},
 	canDrop: function(flag){
 		// summary:
@@ -10617,7 +10617,7 @@ dojo.declare("dojo.dnd.Manager", null, {
 		//		updates the avatar; it is separate to be overwritten dynamically, if needed
 		this.avatar.update();
 	},
-	
+
 	// mouse event processors
 	onMouseMove: function(e){
 		// summary:
@@ -10632,7 +10632,7 @@ dojo.declare("dojo.dnd.Manager", null, {
 			s.left = (e.pageX + this.OFFSET_X) + "px";
 			s.top  = (e.pageY + this.OFFSET_Y) + "px";
 			var copy = Boolean(this.source.copyState(dojo.isCopyKey(e)));
-			if(this.copy != copy){ 
+			if(this.copy != copy){
 				this._setCopyStatus(copy);
 			}
 		}
@@ -10654,7 +10654,7 @@ dojo.declare("dojo.dnd.Manager", null, {
 			this.stopDrag();
 		}
 	},
-	
+
 	// keyboard event processors
 	onKeyDown: function(e){
 		// summary:
@@ -10666,7 +10666,7 @@ dojo.declare("dojo.dnd.Manager", null, {
 			switch(e.keyCode){
 				case dojo.keys.CTRL:
 					var copy = Boolean(this.source.copyState(true));
-					if(this.copy != copy){ 
+					if(this.copy != copy){
 						this._setCopyStatus(copy);
 					}
 					break;
@@ -10684,12 +10684,12 @@ dojo.declare("dojo.dnd.Manager", null, {
 		//		keyboard event
 		if(this.avatar && e.keyCode == dojo.keys.CTRL){
 			var copy = Boolean(this.source.copyState(false));
-			if(this.copy != copy){ 
+			if(this.copy != copy){
 				this._setCopyStatus(copy);
 			}
 		}
 	},
-	
+
 	// utilities
 	_setCopyStatus: function(copy){
 		// summary:
@@ -10788,7 +10788,7 @@ dojo.dnd.__SourceArgs = function(){
 dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 	// summary:
 	//		a Source object, which can be used as a DnD source, or a DnD target
-	
+
 	// object attributes (for markup)
 	isSource: true,
 	horizontal: false,
@@ -10801,13 +10801,13 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 	delay: 0, // pixels
 	accept: ["text"],
 	generateText: true,
-	
+
 	constructor: function(/*DOMNode|String*/node, /*dojo.dnd.__SourceArgs?*/params){
-		// summary: 
+		// summary:
 		//		a constructor of the Source
 		// node:
 		//		node or node's id to build the source on
-		// params: 
+		// params:
 		//		any property of this class may be configured via the params
 		//		object which is mixed-in to the `dojo.dnd.Source` instance
 		dojo.mixin(this, dojo.mixin({}, params));
@@ -10846,7 +10846,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 			dojo.subscribe("/dnd/cancel", this, "onDndCancel")
 		];
 	},
-	
+
 	// methods
 	checkAcceptance: function(source, nodes){
 		// summary:
@@ -10882,7 +10882,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 		//		the "copy" key was pressed
 		// self: Boolean?
 		//		optional flag that means that we are about to drop on itself
-		
+
 		if(keyPressed){ return true; }
 		if(arguments.length < 2){
 			self = this == dojo.dnd.manager().target;
@@ -10969,7 +10969,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 			dojo.dnd.Source.superclass.onMouseUp.call(this, e);
 		}
 	},
-	
+
 	// topic event processors
 	onDndSourceOver: function(source){
 		// summary:
@@ -11036,7 +11036,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 		this._changeState("Source", "");
 		this._changeState("Target", "");
 	},
-	
+
 	// local events
 	onDrop: function(source, nodes, copy){
 		// summary:
@@ -11047,7 +11047,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 		//		the list of transferred items
 		// copy: Boolean
 		//		copy items, if true, move items otherwise
-		
+
 		if(this != source){
 			this.onDropExternal(source, nodes, copy);
 		}else{
@@ -11064,7 +11064,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 		//		the list of transferred items
 		// copy: Boolean
 		//		copy items, if true, move items otherwise
-		
+
 		var oldCreator = this._normalizedCreator;
 		// transferring nodes from the source to the target
 		if(this.creator){
@@ -11109,7 +11109,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 		//		the list of transferred items
 		// copy: Boolean
 		//		copy items, if true, move items otherwise
-		
+
 		var oldCreator = this._normalizedCreator;
 		// transferring nodes within the single source
 		if(this.current && this.current.id in this.selection){
@@ -11156,7 +11156,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 		//		called during the active DnD operation, when items
 		//		are dragged away from this target, and it is not disabled
 	},
-	
+
 	// utilities
 	onOverEvent: function(){
 		// summary:
@@ -11211,12 +11211,12 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 		//		checks if user clicked on "approved" items
 		// e: Event
 		//		mouse event
-		
+
 		// accept only the left mouse button
 		if(!dojo.mouseButtons.isLeft(e)){ return false; }
-		
+
 		if(!this.withHandles){ return true; }
-		
+
 		// check for handles
 		for(var node = e.target; node && node !== this.node; node = node.parentNode){
 			if(dojo.hasClass(node, "dojoDndHandle")){ return true; }
@@ -11228,7 +11228,7 @@ dojo.declare("dojo.dnd.Source", dojo.dnd.Selector, {
 
 dojo.declare("dojo.dnd.Target", dojo.dnd.Source, {
 	// summary: a Target object, which can be used as a DnD target
-	
+
 	constructor: function(node, params){
 		// summary:
 		//		a constructor of the Target --- see the `dojo.dnd.Source.constructor` for details
@@ -11246,7 +11246,7 @@ dojo.declare("dojo.dnd.Target", dojo.dnd.Source, {
 dojo.declare("dojo.dnd.AutoSource", dojo.dnd.Source, {
 	// summary:
 	//		a source that syncs its DnD nodes by default
-	
+
 	constructor: function(node, params){
 		// summary:
 		//		constructor of the AutoSource --- see the Source constructor for details
@@ -11297,7 +11297,7 @@ dojo.provide("dojox.grid._View");
 		viewWidth: "",
 
 		templateString:"<div class=\"dojoxGridView\" wairole=\"presentation\">\n\t<div class=\"dojoxGridHeader\" dojoAttachPoint=\"headerNode\" wairole=\"presentation\">\n\t\t<div dojoAttachPoint=\"headerNodeContainer\" style=\"width:9000em\" wairole=\"presentation\">\n\t\t\t<div dojoAttachPoint=\"headerContentNode\" wairole=\"row\"></div>\n\t\t</div>\n\t</div>\n\t<input type=\"checkbox\" class=\"dojoxGridHiddenFocus\" dojoAttachPoint=\"hiddenFocusNode\" wairole=\"presentation\" />\n\t<input type=\"checkbox\" class=\"dojoxGridHiddenFocus\" wairole=\"presentation\" />\n\t<div class=\"dojoxGridScrollbox\" dojoAttachPoint=\"scrollboxNode\" wairole=\"presentation\">\n\t\t<div class=\"dojoxGridContent\" dojoAttachPoint=\"contentNode\" hidefocus=\"hidefocus\" wairole=\"presentation\"></div>\n\t</div>\n</div>\n",
-		
+
 		themeable: false,
 		classTag: 'dojoxGrid',
 		marginBottom: 0,
@@ -11306,15 +11306,15 @@ dojo.provide("dojox.grid._View");
 		// _togglingColumn: int
 		//		Width of the column being toggled (-1 for none)
 		_togglingColumn: -1,
-		
+
 		// _headerBuilderClass: Object
 		//		The class to use for our header builder
 		_headerBuilderClass: dojox.grid._HeaderBuilder,
-		
+
 		// _contentBuilderClass: Object
 		//		The class to use for our content builder
 		_contentBuilderClass: dojox.grid._ContentBuilder,
-		
+
 		postMixInProperties: function(){
 			this.rowNodes = {};
 		},
@@ -11344,7 +11344,7 @@ dojo.provide("dojox.grid._View");
 			this.inherited(arguments);
 		},
 
-		// focus 
+		// focus
 		focus: function(){
 			if(dojo.isIE || dojo.isWebKit || dojo.isOpera){
 				this.hiddenFocusNode.focus();
@@ -11373,7 +11373,7 @@ dojo.provide("dojox.grid._View");
 			// accomodate new structure
 			this.updateStructure();
 		},
-		
+
 		_cleanupRowWidgets: function(inRowNode){
 			// Summary:
 			//		Cleans up the widgets for the given row node so that
@@ -11389,14 +11389,14 @@ dojo.provide("dojox.grid._View");
 				});
 			}
 		},
-		
+
 		onBeforeRow: function(inRowIndex, cells){
 			this._onBeforeRow(inRowIndex, cells);
 			if(inRowIndex >= 0){
 				this._cleanupRowWidgets(this.getRowNode(inRowIndex));
 			}
 		},
-		
+
 		onAfterRow: function(inRowIndex, cells, inRowNode){
 			this._onAfterRow(inRowIndex, cells, inRowNode);
 			var g = this.grid;
@@ -11494,7 +11494,7 @@ dojo.provide("dojox.grid._View");
 				if(this.source){
 					this.source.destroy();
 				}
-				
+
 				// Create the top and bottom markers
 				var bottomMarkerId = "dojoxGrid_bottomMarker";
 				var topMarkerId = "dojoxGrid_topMarker";
@@ -11513,7 +11513,7 @@ dojo.provide("dojox.grid._View");
 					}, dojo.body());
 					this._hide(this.bottomMarker);
 
-					
+
 					this.topMarker = dojo.create("div", {
 						"id": topMarkerId,
 						"class": "dojoxGridColPlaceTop"
@@ -11523,7 +11523,7 @@ dojo.provide("dojox.grid._View");
 				this.arrowDim = dojo.contentBox(this.bottomMarker);
 
 				var headerHeight = dojo.contentBox(this.headerContentNode.firstChild.rows[0]).h;
-				
+
 				this.source = new dojo.dnd.Source(this.headerContentNode.firstChild.rows[0], {
 					horizontal: true,
 					accept: [ "gridColumn_" + this.grid.id ],
@@ -11557,7 +11557,7 @@ dojo.provide("dojox.grid._View");
 							src._removeItemClass(getSibling(src.targetAnchor, src.before), src.before ? "After" : "Before");
 						}
 						dojo.dnd.Source.prototype._markTargetAnchor.call(src, before);
-						
+
 						var target = before ? src.targetAnchor : getSibling(src.targetAnchor, src.before);
 						var endAdd = 0;
 
@@ -11621,7 +11621,7 @@ dojo.provide("dojox.grid._View");
 				this.source.startup();
 			}
 		},
-		
+
 		_hide: function(node){
 			dojo.style(node, {
 				left: "-10000px",
@@ -11677,7 +11677,7 @@ dojo.provide("dojox.grid._View");
 			var idx = this.index;
 			delete this.source._targetNode;
 			delete this.source._beforeTarget;
-			
+
 			layout.moveColumn(
 				source.viewIndex,
 				idx,
@@ -11699,7 +11699,7 @@ dojo.provide("dojox.grid._View");
 		_getHeaderContent: function(inCell){
 			var n = inCell.name || inCell.grid.getCellName(inCell);
 			var ret = [ '<div class="dojoxGridSortNode' ];
-			
+
 			if(inCell.index != inCell.grid.getSortIndex()){
 				ret.push('">');
 			}else{
@@ -11762,7 +11762,7 @@ dojo.provide("dojox.grid._View");
 			}
 			return this._hasVScroll; // Boolean
 		},
-		
+
 		convertColPctToFixed: function(){
 			// Fix any percentage widths to be pixel values
 			var hasPct = false;
@@ -11822,7 +11822,7 @@ dojo.provide("dojox.grid._View");
 				this.contentWidth = this.getContentWidth();
 				this.headerContentNode.firstChild.style.width = this.contentWidth;
 			}
-			// FIXME: it should be easier to get w from this.scrollboxNode.clientWidth, 
+			// FIXME: it should be easier to get w from this.scrollboxNode.clientWidth,
 			// but clientWidth seemingly does not include scrollbar width in some cases
 			var w = this.scrollboxNode.offsetWidth - this.getScrollbarWidth();
 			if(!this._removingColumn){
@@ -11872,16 +11872,16 @@ dojo.provide("dojox.grid._View");
 		},
 
 		buildRow: function(inRowIndex, inRowNode){
-			
+
 			this.buildRowContent(inRowIndex, inRowNode);
-		  	
+
 			this.styleRow(inRowIndex, inRowNode);
-		  
-		 
+
+
 		},
 
 		buildRowContent: function(inRowIndex, inRowNode){
-			inRowNode.innerHTML = this.content.generateHtml(inRowIndex, inRowIndex); 
+			inRowNode.innerHTML = this.content.generateHtml(inRowIndex, inRowIndex);
 			if(this.flexCells && this.contentWidth){
 				// FIXME: accessing firstChild here breaks encapsulation
 				inRowNode.firstChild.style.width = this.contentWidth;
@@ -12115,7 +12115,7 @@ dojo.declare('dojox.grid._RowSelector', dojox.grid._View, {
 		this.inherited('buildRendering', arguments);
 		this.scrollboxNode.style.overflow = "hidden";
 		this.headerNode.style.visibility = "hidden";
-	},	
+	},
 	getWidth: function(){
 		return this.viewWidth || this.defaultWidth;
 	},
@@ -12249,7 +12249,7 @@ dojo.declare("dojox.grid._Layout", null, {
 			return false;
 		}
 	},
-	
+
 	addCellDef: function(inRowIndex, inCellIndex, inDef){
 		var self = this;
 		var getCellWidth = function(inDef){
@@ -12283,9 +12283,9 @@ dojo.declare("dojox.grid._Layout", null, {
 		var cell_type = inDef.type || this._defaultCellProps.type || dojox.grid.cells.Cell;
 
 		props.unitWidth = getCellWidth(inDef);
-		return new cell_type(dojo.mixin({}, this._defaultCellProps, inDef, props));	
+		return new cell_type(dojo.mixin({}, this._defaultCellProps, inDef, props));
 	},
-	
+
 	addRowDef: function(inRowIndex, inDef){
 		var result = [];
 		var relSum = 0, pctSum = 0, doRel = true;
@@ -12302,7 +12302,7 @@ dojo.declare("dojox.grid._Layout", null, {
 					pctSum += window.parseInt(w, 10);
 				}else if(w == "auto"){
 					// relative widths doesn't play nice with auto - since we
-					// don't have a way of knowing how much space the auto is 
+					// don't have a way of knowing how much space the auto is
 					// supposed to take up.
 					doRel = false;
 				}
@@ -12317,7 +12317,7 @@ dojo.declare("dojox.grid._Layout", null, {
 			});
 		}
 		return result;
-	
+
 	},
 
 	addRowsDef: function(inDef){
@@ -12331,9 +12331,9 @@ dojo.declare("dojox.grid._Layout", null, {
 				result.push(this.addRowDef(0, inDef));
 			}
 		}
-		return result;	
+		return result;
 	},
-	
+
 	addViewDef: function(inDef){
 		this._defaultCellProps = inDef.defaultCell || {};
 		if(inDef.width && inDef.width == "auto"){
@@ -12341,7 +12341,7 @@ dojo.declare("dojox.grid._Layout", null, {
 		}
 		return dojo.mixin({}, inDef, {cells: this.addRowsDef(inDef.rows || inDef.cells)});
 	},
-	
+
 	setStructure: function(inStructure){
 		this.fieldIndex = 0;
 		this.cells = [];
@@ -12498,9 +12498,9 @@ dojo.declare('dojox.grid._ViewManager', null, {
 		if(this.grid.rowHeight){
 			h = this.grid.rowHeight;
 		}else{
-			if(inRowNodes.length <= 1){ 
+			if(inRowNodes.length <= 1){
 				// no need to normalize if we are the only one...
-				return; 
+				return;
 			}
 			for(var i=0, n; (n=inRowNodes[i]); i++){
 				// We only care about the height - so don't use marginBox.  This
@@ -12513,7 +12513,7 @@ dojo.declare('dojox.grid._ViewManager', null, {
 				}
 			}
 			h = (h >= 0 ? h : 0);
-	
+
 			//Work around odd FF3 rendering bug: #8864.
 			//A one px increase fixes FireFox 3's rounding bug for fractional font sizes.
 			if(dojo.isMoz && h){h++;}
@@ -12524,7 +12524,7 @@ dojo.declare('dojox.grid._ViewManager', null, {
 			}
 		}
 	},
-	
+
 	resetHeaderNodeHeight: function(){
 		for(var i=0, v, n; (v=this.views[i]); i++){
 			n = v.headerContentNode.firstChild;
@@ -12611,7 +12611,7 @@ dojo.declare('dojox.grid._ViewManager', null, {
 					hs.right = l + v.getScrollbarWidth() + 'px';
 					hs.width = parseInt(hs.width, 10) - v.getScrollbarWidth() + 'px';
 				}else{
-					hs.right = l + 'px';					
+					hs.right = l + 'px';
 				}
 			}else{
 				ds.left = l + 'px';
@@ -12621,7 +12621,7 @@ dojo.declare('dojox.grid._ViewManager', null, {
 			hs.top = 0;
 		};
 		// for views left of the client
-		//BiDi TODO: The left and right should not appear in BIDI environment. Should be replaced with 
+		//BiDi TODO: The left and right should not appear in BIDI environment. Should be replaced with
 		//leading and tailing concept.
 		for(i=0; (v=this.views[i])&&(i<c); i++){
 			// get width
@@ -12637,7 +12637,7 @@ dojo.declare('dojox.grid._ViewManager', null, {
 			// update position
 			l += vw;
 		}
-		// next view (is the client, i++ == c) 
+		// next view (is the client, i++ == c)
 		i++;
 		// start from the right edge
 		var r = w;
@@ -12656,7 +12656,7 @@ dojo.declare('dojox.grid._ViewManager', null, {
 		}
 		if(c<len){
 			v = this.views[c];
-			// position the client box between left and right boxes	
+			// position the client box between left and right boxes
 			vw = Math.max(1, r-l);
 			// set size
 			v.setSize(vw + 'px', 0);
@@ -12677,11 +12677,11 @@ dojo.declare('dojox.grid._ViewManager', null, {
 			this.normalizeRowNodeHeights(rowNodes);
 		}
 	},
-	
+
 	rowRemoved: function(inRowIndex){
 		this.onEach("rowRemoved", [ inRowIndex ]);
 	},
-	
+
 	// updating
 	updateRow: function(inRowIndex, skipRenorm){
 		for(var i=0, v; v=this.views[i]; i++){
@@ -12691,11 +12691,11 @@ dojo.declare('dojox.grid._ViewManager', null, {
 			this.renormalizeRow(inRowIndex);
 		}
 	},
-	
+
 	updateRowStyles: function(inRowIndex){
 		this.onEach("updateRowStyles", [ inRowIndex ]);
 	},
-	
+
 	// scrolling
 	setScrollTop: function(inTop){
 		var top = inTop;
@@ -12710,9 +12710,9 @@ dojo.declare('dojox.grid._ViewManager', null, {
 		return top;
 		//this.onEach("setScrollTop", [ inTop ]);
 	},
-	
+
 	getFirstScrollingView: function(){
-		// summary: Returns the first grid view with a scroll bar 
+		// summary: Returns the first grid view with a scroll bar
 		for(var i=0, v; (v=this.views[i]); i++){
 			if(v.hasHScrollbar() || v.hasVScrollbar()){
 				return v;
@@ -12720,7 +12720,7 @@ dojo.declare('dojox.grid._ViewManager', null, {
 		}
 		return null;
 	}
-	
+
 });
 
 }
@@ -12748,7 +12748,7 @@ dojo.provide("dojox.grid._RowManager");
 		// styles
 		prepareStylingRow: function(inRowIndex, inRowNode){
 			return {
-				index: inRowIndex, 
+				index: inRowIndex,
 				node: inRowNode,
 				odd: Boolean(inRowIndex&1),
 				selected: !!this.grid.selection.isSelected(inRowIndex),
@@ -12860,7 +12860,7 @@ dojo.declare("dojox.grid._FocusManager", null, {
 		// summary:
 		//	states whether currently navigating among column headers.
 		// returns:
-		//	true if focus is on a column header; false otherwise. 
+		//	true if focus is on a column header; false otherwise.
 		return (!!this._colHeadNode);
 	},
 	getHeaderIndex: function(){
@@ -12894,14 +12894,14 @@ dojo.declare("dojox.grid._FocusManager", null, {
 				return;
 		}
 		var n = this.cell && this.cell.getNode(this.rowIndex);
-		if(n){ 
+		if(n){
 			try{
 				if(!this.grid.edit.isEditing()){
 					dojo.toggleClass(n, this.focusClass, true);
 					this.blurHeader();
 					dojox.grid.util.fire(n, "focus");
 				}
-			} 
+			}
 			catch(e){}
 		}
 	},
@@ -13013,11 +13013,11 @@ dojo.declare("dojox.grid._FocusManager", null, {
 	_isHeaderHidden: function(){
 		// summary:
 		//		determine if the grid headers are hidden
-		//		relies on documented technique of setting .dojoxGridHeader { display:none; } 
+		//		relies on documented technique of setting .dojoxGridHeader { display:none; }
 		// returns: Boolean
 		//		true if headers are hidden
 		//		false if headers are not hidden
-		
+
 		var curView = this.focusView;
 		if (!curView){
 			// find one so we can determine if headers are hidden
@@ -13025,8 +13025,8 @@ dojo.declare("dojox.grid._FocusManager", null, {
 			for (var i = 0, cView; (cView = this.grid.views.views[i]); i++) {
 				if(cView.headerNode ){
 					curView=cView;
-					break;		
-				}	
+					break;
+				}
 			}
 		}
 		return (curView && dojo.getComputedStyle(curView.headerNode).display == "none");
@@ -13039,20 +13039,20 @@ dojo.declare("dojox.grid._FocusManager", null, {
 				// find first view with a tableMap in order to work with empty grid
 				if(cView.header.tableMap.map ){
 					view=cView;
-					break;		
+					break;
 				}
 			}
 		}
 		var curHeader = headers[colIdx];
 		if (!view || (colIdx == headers.length-1 && colIdx === 0)){
 			return; // can't adjust single col. grid
-		}	
+		}
 		view.content.baseDecorateEvent(e);
 		// need to adjust event with header cell info since focus is no longer on header cell
 		e.cellNode = curHeader; //this.findCellTarget(e.target, e.rowNode);
 		e.cellIndex = view.content.getCellNodeIndex(e.cellNode);
 		e.cell = (e.cellIndex >= 0 ? this.grid.getCell(e.cellIndex) : null);
-		if (view.header.canResize(e)){ 
+		if (view.header.canResize(e)){
 			var deltaObj = {
 				l: delta
 			};
@@ -13233,7 +13233,7 @@ dojo.declare("dojox.grid._FocusManager", null, {
 			this.focusHeader();
 			dojo.stopEvent(e);
 		}else if(this.isNavHeader()){
-			// if tabbing from col header, then go to grid proper. 
+			// if tabbing from col header, then go to grid proper.
 			this.blurHeader();
 			if(!this.findAndFocusGridCell()){
 				this.tabOut(this.grid.lastFocusNode);
@@ -13259,18 +13259,18 @@ dojo.declare("dojox.grid._FocusManager", null, {
 	},
 	findAndFocusGridCell: function(){
 		// summary:
-		//		find the first focusable grid cell 
+		//		find the first focusable grid cell
 		// returns: Boolean
 		//		true if focus was set to a cell
 		//		false if no cell found to set focus onto
-		
+
 		var didFocus = true;
 		var isEmpty = (this.grid.rowCount === 0); // If grid is empty this.grid.rowCount == 0
 		if (this.isNoFocusCell() && !isEmpty){
 			var cellIdx = 0;
 			var cell = this.grid.getCell(cellIdx);
 			if (cell.hidden) {
-				// if first cell isn't visible, use _colHeadFocusIdx 
+				// if first cell isn't visible, use _colHeadFocusIdx
 				// could also use a while loop to find first visible cell - not sure that is worth it
 				cellIdx = this.isNavHeader() ? this._colHeadFocusIdx : 0;
 			}
@@ -13278,7 +13278,7 @@ dojo.declare("dojox.grid._FocusManager", null, {
 		}
 		else if (this.cell && !isEmpty){
 			if (this.focusView && !this.focusView.rowNodes[this.rowIndex]){
-				// if rowNode for current index is undefined (likely as a result of a sort and because of #7304) 
+				// if rowNode for current index is undefined (likely as a result of a sort and because of #7304)
 				// scroll to that row
 				this.grid.scrollToRow(this.rowIndex);
 			}
@@ -13359,7 +13359,7 @@ dojo.declare("dojox.grid._FocusManager", null, {
 	doContextMenu: function(e){
 	//stop contextMenu event if no header Menu to prevent default/browser contextMenu
 		if (!this.headerMenu){
-			dojo.stopEvent(e); 
+			dojo.stopEvent(e);
 		}
 	},
 	doLastNodeFocus: function(e){
@@ -13386,7 +13386,7 @@ dojo.declare("dojox.grid._FocusManager", null, {
 	},
 	doColHeaderBlur: function(e){
 		dojo.toggleClass(e.target, this.focusClass, false);
-	}		
+	}
 });
 
 }
@@ -13409,7 +13409,7 @@ dojo.declare("dojox.grid._EditManager", null, {
 			this.connections.push(dojo.connect(document.body, "onfocus", dojo.hitch(this, "_boomerangFocus")));
 		}
 	},
-	
+
 	info: {},
 
 	destroy: function(){
@@ -13430,7 +13430,7 @@ dojo.declare("dojox.grid._EditManager", null, {
 			// otherwise, apply any pending row edits
 			this.apply();
 		}
-		// if dynamic or static editing...
+		// if manual-entry or static editing...
 		if(this.isEditing() || (inCell && inCell.editable && inCell.alwaysEditing)){
 			// let the editor focus itself as needed
 			this._focusEditor(inCell, inRowIndex);
@@ -13538,7 +13538,7 @@ dojo.declare("dojox.grid._EditManager", null, {
 		}
 		if(inEditing){
 			this.info = { cell: inCell, rowIndex: inRowIndex };
-			this.grid.doStartEdit(inCell, inRowIndex); 
+			this.grid.doStartEdit(inCell, inRowIndex);
 			this.grid.updateRow(inRowIndex);
 		}else{
 			this.info = {};
@@ -13906,14 +13906,14 @@ dojo.provide("dojox.grid._Events");
 dojo.declare("dojox.grid._Events", null, {
 	// summary:
 	//		_Grid mixin that provides default implementations for grid events.
-	// description: 
+	// description:
 	//		Default synthetic events dispatched for _Grid. dojo.connect to events to
 	//		retain default implementation or override them for custom handling.
-	
+
 	// cellOverClass: String
 	// 		css class to apply to grid cells over which the cursor is placed.
 	cellOverClass: "dojoxGridCellOver",
-	
+
 	onKeyEvent: function(e){
 		// summary: top level handler for Key Events
 		this.dispatchKeyEvent(e);
@@ -13944,7 +13944,7 @@ dojo.declare("dojox.grid._Events", null, {
 		this.focus.styleRow(inRow);
 		this.edit.styleRow(inRow);
 	},
-	
+
 	onKeyDown: function(e){
 		// summary:
 		// 		Grid key event handler. By default enter begins editing and applies edits, escape cancels an edit,
@@ -14051,7 +14051,7 @@ dojo.declare("dojox.grid._Events", null, {
 				break;
 		}
 	},
-	
+
 	onMouseOver: function(e){
 		// summary:
 		//		Event fired when mouse is over the grid.
@@ -14059,7 +14059,7 @@ dojo.declare("dojox.grid._Events", null, {
 		//		Decorated event object contains reference to grid, cell, and rowIndex
 		e.rowIndex == -1 ? this.onHeaderCellMouseOver(e) : this.onCellMouseOver(e);
 	},
-	
+
 	onMouseOut: function(e){
 		// summary:
 		//		Event fired when mouse moves out of the grid.
@@ -14067,7 +14067,7 @@ dojo.declare("dojox.grid._Events", null, {
 		//		Decorated event object that contains reference to grid, cell, and rowIndex
 		e.rowIndex == -1 ? this.onHeaderCellMouseOut(e) : this.onCellMouseOut(e);
 	},
-	
+
 	onMouseDown: function(e){
 		// summary:
 		//		Event fired when mouse is down inside grid.
@@ -14075,7 +14075,7 @@ dojo.declare("dojox.grid._Events", null, {
 		//		Decorated event object that contains reference to grid, cell, and rowIndex
 		e.rowIndex == -1 ? this.onHeaderCellMouseDown(e) : this.onCellMouseDown(e);
 	},
-	
+
 	onMouseOverRow: function(e){
 		// summary:
 		//		Event fired when mouse is over any row (data or header).
@@ -14098,7 +14098,7 @@ dojo.declare("dojox.grid._Events", null, {
 			this.onRowMouseOut(e);
 		}
 	},
-	
+
 	onMouseDownRow: function(e){
 		// summary:
 		//		Event fired when mouse is down inside grid row
@@ -14118,7 +14118,7 @@ dojo.declare("dojox.grid._Events", null, {
 			dojo.addClass(e.cellNode, this.cellOverClass);
 		}
 	},
-	
+
 	onCellMouseOut: function(e){
 		// summary:
 		//		Event fired when mouse moves out of a cell.
@@ -14128,7 +14128,7 @@ dojo.declare("dojox.grid._Events", null, {
 			dojo.removeClass(e.cellNode, this.cellOverClass);
 		}
 	},
-	
+
 	onCellMouseDown: function(e){
 		// summary:
 		//		Event fired when mouse is down in a header cell.
@@ -14212,7 +14212,7 @@ dojo.declare("dojox.grid._Events", null, {
 		// e: Event
 		// 		Decorated event object contains reference to grid, cell, and rowIndex
 	},
-	
+
 	onRowMouseDown: function(e){
 		// summary:
 		//		Event fired when mouse is down in a row.
@@ -14262,7 +14262,7 @@ dojo.declare("dojox.grid._Events", null, {
 			dojo.removeClass(e.cellNode, this.cellOverClass);
 		}
 	},
-	
+
 	onHeaderCellMouseDown: function(e) {
 		// summary:
 		//		Event fired when mouse is down in a header cell.
@@ -14484,7 +14484,7 @@ dojo.i18n._requireLocalization = function(/*String*/moduleName, /*String*/bundle
 
 	var targetLocale = dojo.i18n.normalizeLocale(locale);
  	var bundlePackage = [moduleName, "nls", bundleName].join(".");
-	// NOTE: 
+	// NOTE:
 	//		When loading these resources, the packaging does not match what is
 	//		on disk.  This is an implementation detail, as this is just a
 	//		private data structure to hold the loaded resources.  e.g.
@@ -14494,7 +14494,7 @@ dojo.i18n._requireLocalization = function(/*String*/moduleName, /*String*/bundle
 	//		in memory it is more logical and efficient to store in a different
 	//		order.  Locales cannot use dashes, since the resulting path will
 	//		not evaluate as valid JS, so we translate them to underscores.
-	
+
 	//Find the best-match locale to load if we have available flat locales.
 	var bestLocale = "";
 	if(availableFlatLocales){
@@ -14511,7 +14511,7 @@ dojo.i18n._requireLocalization = function(/*String*/moduleName, /*String*/bundle
 		}
 		if(!bestLocale){
 			bestLocale = "ROOT";
-		}		
+		}
 	}
 
 	//See if the desired locale is already loaded.
@@ -14557,7 +14557,7 @@ dojo.i18n._requireLocalization = function(/*String*/moduleName, /*String*/bundle
 			}else{
 				bundle[jsLoc] = parent;
 			}
-			
+
 			if(availableFlatLocales){
 				//Stop the locale path searching if we know the availableFlatLocales, since
 				//the first call to this function will load the only bundle that is needed.
@@ -14575,8 +14575,8 @@ dojo.i18n._requireLocalization = function(/*String*/moduleName, /*String*/bundle
 
 (function(){
 	// If other locales are used, dojo.requireLocalization should load them as
-	// well, by default. 
-	// 
+	// well, by default.
+	//
 	// Override dojo.requireLocalization to do load the default bundle, then
 	// iterate through the extraLocale list and load those translations as
 	// well, unless a particular locale was requested.
@@ -14855,11 +14855,11 @@ dojo.provide("dojox.grid._Grid");
 		// autoWidth: Boolean
 		//		If autoWidth is true, grid width is automatically set to fit the data.
 		autoWidth: false,
-		
+
 		// initialWidth: String
 		//		A css string to use to set our initial width (only used if autoWidth
 		//		is true).  The first rendering of the grid will be this width, any
-		//		resizing of columns, etc will result in the grid switching to 
+		//		resizing of columns, etc will result in the grid switching to
 		//		autoWidth mode.  Note, this width will override any styling in a
 		//		stylesheet or directly on the node.
 		initialWidth: "",
@@ -14875,9 +14875,9 @@ dojo.provide("dojox.grid._Grid");
 		//		If rowHeight is set to a positive number, it will define the height of the rows
 		//		in pixels. This can provide a significant performance advantage, since it
 		//		eliminates the need to measure row sizes during rendering, which is one
-		// 		the primary bottlenecks in the DataGrid's performance. 
+		// 		the primary bottlenecks in the DataGrid's performance.
 		rowHeight: 0,
-		
+
 		// autoRender: Boolean
 		//		If autoRender is true, grid will render itself after initialization.
 		autoRender: true,
@@ -14885,7 +14885,7 @@ dojo.provide("dojox.grid._Grid");
 		// defaultHeight: String
 		//		default height of the grid, measured in any valid css unit.
 		defaultHeight: '15em',
-		
+
 		// height: String
 		//		explicit height of the grid, measured in any valid css unit.  This will be populated (and overridden)
 		//		if the height: css attribute exists on the source node.
@@ -14925,14 +14925,14 @@ dojo.provide("dojox.grid._Grid");
 		// 		Label of placeholders to search for in the header menu to replace with column toggling
 		// 		menu items.
 		placeholderLabel: "GridColumns",
-		
+
 		// selectable: Boolean
 		//		Set to true if you want to be able to select the text within the grid.
 		selectable: false,
-		
+
 		// Used to store the last two clicks, to ensure double-clicking occurs based on the intended row
 		_click: null,
-		
+
 		// loadingMessage: String
 		//  Message that shows while the grid is loading
 		loadingMessage: "<span class='dojoxGridLoading'>${loadingState}</span>",
@@ -14942,33 +14942,33 @@ dojo.provide("dojox.grid._Grid");
 		errorMessage: "<span class='dojoxGridError'>${errorState}</span>",
 
 		// noDataMessage: String
-		//  Message that shows if the grid has no data - wrap it in a 
+		//  Message that shows if the grid has no data - wrap it in a
 		//  span with class 'dojoxGridNoData' if you want it to be
 		//  styled similar to the loading and error messages
 		noDataMessage: "",
-		
+
 		// escapeHTMLInData: Boolean
-		//		This will escape HTML brackets from the data to prevent HTML from 
-		// 		user-inputted data being rendered with may contain JavaScript and result in 
-		// 		XSS attacks. This is true by default, and it is recommended that it remain 
-		// 		true. Setting this to false will allow data to be displayed in the grid without 
-		// 		filtering, and should be only used if it is known that the data won't contain 
-		// 		malicious scripts. If HTML is needed in grid cells, it is recommended that 
-		// 		you use the formatter function to generate the HTML (the output of 
+		//		This will escape HTML brackets from the data to prevent HTML from
+		// 		user-inputted data being rendered with may contain JavaScript and result in
+		// 		XSS attacks. This is true by default, and it is recommended that it remain
+		// 		true. Setting this to false will allow data to be displayed in the grid without
+		// 		filtering, and should be only used if it is known that the data won't contain
+		// 		malicious scripts. If HTML is needed in grid cells, it is recommended that
+		// 		you use the formatter function to generate the HTML (the output of
 		// 		formatter functions is not filtered, even with escapeHTMLInData set to true).
-		escapeHTMLInData: true,	
-		
+		escapeHTMLInData: true,
+
 		// formatterScope: Object
 		//		An object to execute format functions within.  If not set, the
 		//		format functions will execute within the scope of the cell that
 		//		has a format function.
 		formatterScope: null,
-		
+
 		// editable: boolean
 		// indicates if the grid contains editable cells, default is false
-		// set to true if editable cell encountered during rendering 
+		// set to true if editable cell encountered during rendering
 		editable: false,
-		
+
 		// private
 		sortInfo: 0,
 		themeable: true,
@@ -15007,7 +15007,7 @@ dojo.provide("dojox.grid._Grid");
 				dojo.addClass(this.domNode, this.classTag+"Rtl");
 			}
 		},
-		
+
 		postMixInProperties: function(){
 			this.inherited(arguments);
 			var messages = dojo.i18n.getLocalization("dijit", "loading", this.lang);
@@ -15020,7 +15020,7 @@ dojo.provide("dojox.grid._Grid");
 			this._setAutoHeightAttr(this.autoHeight, true);
 			this.lastScrollTop = this.scrollTop = 0;
 		},
-		
+
 		postCreate: function(){
 			this._placeholders = [];
 			this._setHeaderMenuAttr(this.headerMenu);
@@ -15078,7 +15078,7 @@ dojo.provide("dojox.grid._Grid");
 					ah = false;
 				}
 				// Autoheight must be at least 1, if it's a number.  If it's
-				// less than 0, we'll take that to mean "all" rows (same as 
+				// less than 0, we'll take that to mean "all" rows (same as
 				// autoHeight=true - if it is equal to zero, we'll take that
 				// to mean autoHeight=false
 				if(ah < 0){
@@ -15104,7 +15104,7 @@ dojo.provide("dojox.grid._Grid");
 			return this.updating && this.invalidated && this.invalidated.rowCount != undefined ?
 				this.invalidated.rowCount : this.rowCount;
 		},
-		
+
 		textSizeChanged: function(){
 			this.render();
 		},
@@ -15149,7 +15149,7 @@ dojo.provide("dojox.grid._Grid");
 		onMoveColumn: function(){
 			this.render();
 		},
-		
+
 		onResizeColumn: function(/*int*/ cellIdx){
 			// Called when a column is resized.
 		},
@@ -15203,7 +15203,7 @@ dojo.provide("dojox.grid._Grid");
 			dojo.deprecated("dojox.grid._Grid.setStructure(obj)", "use dojox.grid._Grid.attr('structure', obj) instead.", "2.0");
 			this._setStructureAttr(inStructure);
 		},
-		
+
 		getColumnTogglingItems: function(){
 			// Summary: returns an array of dijit.CheckedMenuItem widgets that can be
 			//		added to a menu for toggling columns on and off.
@@ -15273,7 +15273,7 @@ dojo.provide("dojox.grid._Grid");
 			dojo.deprecated("dojox.grid._Grid.setHeaderMenu(obj)", "use dojox.grid._Grid.attr('headerMenu', obj) instead.", "2.0");
 			this._setHeaderMenuAttr(menu);
 		},
-		
+
 		setupHeaderMenu: function(){
 			if(this._placeholders && this._placeholders.length){
 				dojo.forEach(this._placeholders, function(p){
@@ -15292,7 +15292,7 @@ dojo.provide("dojox.grid._Grid");
 		getItem: function(inRowIndex){
 			return null;
 		},
-		
+
 		showMessage: function(message){
 			if(message){
 				this.messagesNode.innerHTML = message;
@@ -15318,9 +15318,9 @@ dojo.provide("dojox.grid._Grid");
 		resize: function(changeSize, resultSize){
 			// summary:
 			//		Update the grid's rendering dimensions and resize it
-			
+
 			// Calling sizeChange calls update() which calls _resize...so let's
-			// save our input values, if any, and use them there when it gets 
+			// save our input values, if any, and use them there when it gets
 			// called.  This saves us an extra call to _resize(), which can
 			// get kind of heavy.
 			this._pendingChangeSize = changeSize;
@@ -15340,7 +15340,7 @@ dojo.provide("dojox.grid._Grid");
 			this.views.normalizeHeaderNodeHeight();
 			return t;
 		},
-		
+
 		_resize: function(changeSize, resultSize){
 			// Restore our pending values, if any
 			changeSize = changeSize || this._pendingChangeSize;
@@ -15386,7 +15386,7 @@ dojo.provide("dojox.grid._Grid");
 				h = this._parentContentBoxHeight = this._parentContentBoxHeight || dojo._getContentBox(pn).h;
 				this.domNode.style.height = Math.max(0, h) + "px";
 			}
-			
+
 			var hasFlex = dojo.some(this.views.views, function(v){ return v.flexCells; });
 
 			if(!this._autoHeight && (h || dojo._getContentBox(this.domNode).h) === 0){
@@ -15505,7 +15505,7 @@ dojo.provide("dojox.grid._Grid");
 			// views are position absolute, so they do not inflate the parent
 			if(this._autoHeight){
 				var size = Math.max(this.views.measureContent()) + 'px';
-				
+
 				this.viewsNode.style.height = size;
 			}
 		},
@@ -15621,7 +15621,7 @@ dojo.provide("dojox.grid._Grid");
 				if(this.layout.cells.length){
 					this.scroller.updateRowCount(inRowCount);
 				}
-				this._resize();				
+				this._resize();
 				if(this.layout.cells.length){
 					this.setScrollTop(this.scrollTop);
 				}
@@ -15721,12 +15721,12 @@ dojo.provide("dojox.grid._Grid");
 				this.rows.styleRowNode(inRowIndex, inRowNode);
 			}
 		},
-		
+
 		// called when the mouse leaves the grid so we can deselect all hover rows
 		_mouseOut: function(e){
 			this.rows.setOverRow(-2);
 		},
-	
+
 		// cells
 		getCell: function(inIndex){
 			// summary:
@@ -16136,7 +16136,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 	queryOptions: null,
 	fetchText: '...',
 	sortFields: null,
-	
+
 	// updateDelay: int
 	//		Time, in milliseconds, to delay updates automatically so that multiple
 	//		calls to onSet/onNew/onDelete don't keep rerendering the grid.  Set
@@ -16153,7 +16153,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 	// You can specify items instead of a query, if you like.  They do not need
 	// to be loaded - but the must be items in the store
 	items: null,
-	
+
 	_store_connects: null,
 	_by_idty: null,
 	_by_idx: null,
@@ -16167,7 +16167,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 
 	_isLoaded: false,
 	_isLoading: false,
-	
+
 	postCreate: function(){
 		this._pages = [];
 		this._store_connects = [];
@@ -16193,7 +16193,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 		//		Row for which to provide data
 		// returns:
 		//		Data to display for a given grid cell.
-		
+
 		if(inItem && this.field == "_item" && !this.fields){
 			return inItem;
 		}else if(inItem && this.fields){
@@ -16230,7 +16230,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 			}
 		}
 	},
-	
+
 	_onSet: function(item, attribute, oldValue, newValue){
 		this._checkUpdateStatus();
 		var idx = this.getItemIndex(item);
@@ -16238,7 +16238,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 			this.updateRow(idx);
 		}
 	},
-	
+
 	_createItem: function(item, index){
 		var idty = this._hasIdentity ? this.store.getIdentity(item) : dojo.toJson(this.query) + ":idx:" + index + ":sort:" + dojo.toJson(this.getSortProps());
 		var o = this._by_idty[idty] = { idty: idty, item: item };
@@ -16268,7 +16268,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 
 		if(idx >= 0){
 			// When a row is deleted, all rest rows are shifted down,
-			// and migrate from page to page. If some page is not 
+			// and migrate from page to page. If some page is not
 			// loaded yet empty rows can migrate to initialized pages
 			// without refreshing. It causes empty rows in some pages, see:
 			// http://bugs.dojotoolkit.org/ticket/6818
@@ -16296,21 +16296,21 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 		this._setStore(store);
 		this._refresh(true);
 	},
-	
+
 	setQuery: function(query, queryOptions){
 		this._setQuery(query, queryOptions);
 		this._refresh(true);
 	},
-	
+
 	setItems: function(items){
 		this.items = items;
 		this._setStore(this.store);
 		this._refresh(true);
 	},
-	
+
 	_setQuery: function(query, queryOptions){
 		this.query = query;
-		this.queryOptions = queryOptions || this.queryOptions;		
+		this.queryOptions = queryOptions || this.queryOptions;
 	},
 
 	_setStore: function(store){
@@ -16378,7 +16378,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 			this.updateRows(req.start, items.length);
 			if(this._autoHeight){
 				this._skipRowRenormalize = false;
-			}			
+			}
 			if(req.isRender){
 				this.setScrollTop(0);
 				this.postrender();
@@ -16429,7 +16429,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 						isRender: isRender
 					};
 					this._onFetchBegin(items.length, req);
-					
+
 					// Load them if we need to
 					var waitCount = 0;
 					dojo.forEach(items, function(i){
@@ -16491,7 +16491,7 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 	getItemIndex: function(item){
 		return this._getItemIndex(item, false);
 	},
-	
+
 	_getItemIndex: function(item, isDeleted){
 		if(!isDeleted && !this.store.isItem(item)){
 			return -1;
@@ -16696,11 +16696,11 @@ dojo.declare("dojox.grid.DataGrid", dojox.grid._Grid, {
 				if(items.length){
 					dojo.forEach(items, this.store.deleteItem, this.store);
 					this.selection.clear();
-				}			
+				}
 			});
 			if(this.allItemsSelected){
 				this.store.fetch({
-							query: this.query, 
+							query: this.query,
 							queryOptions: this.queryOptions,
 							onComplete: fx});
 			}else{
@@ -16726,7 +16726,7 @@ dojox.grid.DataGrid.cell_markupFactory = function(cellFunc, node, cellDef){
 };
 
 dojox.grid.DataGrid.markupFactory = function(props, node, ctor, cellFunc){
-	return dojox.grid._Grid.markupFactory(props, node, ctor, 
+	return dojox.grid._Grid.markupFactory(props, node, ctor,
 					dojo.partial(dojox.grid.DataGrid.cell_markupFactory, cellFunc));
 };
 
