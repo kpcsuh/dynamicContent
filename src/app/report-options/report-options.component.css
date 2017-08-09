@@ -14,3 +14,13 @@
 .toolbar-padding {
   padding-left: 50px;
 }
+
+
+.settings-basic {
+  padding: 20px;
+  /*display: flex;*/
+}
+
+.settings-basic .mat-card-content {
+  padding: 16px;
+}

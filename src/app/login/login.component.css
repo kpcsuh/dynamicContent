@@ -15,11 +15,23 @@
   font-size: 16px;
 }
 
-.example-card {
+.login-card {
   width: 400px;
   float: right;
   flex: 1 1 0;
 }
+
+.poc-card {
+  display: flex;
+  width: 500px;
+  float: left;
+  flex: 1 1 0;
+  margin-top: 150px;
+  margin-left: 100px;
+
+
+}
+
 
 .example-header-image {
   background-image: url('../../assets/img/child-writing.jpg');
