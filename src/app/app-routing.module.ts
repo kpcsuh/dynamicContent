@@ -15,6 +15,10 @@ const routes: Routes = [
   {
     path: "home",
     loadChildren: "app/home/home.module#HomeModule"
+  },
+  {
+    path: "reportoptions",
+    loadChildren: "app/report-options/report-options.module#ReportOptionsModule"
   }
 
 ];

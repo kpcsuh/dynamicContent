@@ -7,6 +7,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {BrowserModule} from "@angular/platform-browser"
 import 'hammerjs';
 import {ManualEntryModule} from "./manual-entry/manual-entry.module"
+import {ReportOptionsModule} from "./report-options/report-options.module"
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import {ManualEntryModule} from "./manual-entry/manual-entry.module"
     BrowserAnimationsModule,
     FlexLayoutModule,
     AppRoutingModule,
-    ManualEntryModule
+    ManualEntryModule,
+    ReportOptionsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

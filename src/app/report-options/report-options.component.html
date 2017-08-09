@@ -1,0 +1,67 @@
+<div>
+  <md-toolbar>Report Options
+
+    <md-chip-list class = "toolbar-padding" [hidden] = "!showActions">
+      <md-chip color="default" selected="true">{{selectedProduct}} &#10142;  {{selectedForm}} &#10142;  {{selectedReport}}</md-chip>
+    </md-chip-list>
+
+  </md-toolbar>
+  <md-card>
+    <md-card-header></md-card-header>
+
+    <md-card-content>
+
+      <form ngForm="reportForm">
+        <table>
+          <tr>
+            <td class="td-padding">
+              <md-select name="productSelect" [(ngModel)]="selectedProduct" (change)="productChange()"
+                         [style.width]="'100%'" placeholder="Products:">
+                <md-optgroup>
+                  <md-option>Please select</md-option>
+                  <md-option *ngFor="let p of products" [value]="p">{{p}}</md-option>
+                </md-optgroup>
+              </md-select>
+
+            </td>
+            <td></td>
+            <td class="td-padding">
+              <md-select name="formSelect" id="formSelect" [(ngModel)]="selectedForm" (change)="formChange()"
+                         [style.width]="'100%'" placeholder="Forms: ">
+                <md-optgroup>
+                  <md-option>Please select</md-option>
+                  <md-option *ngFor="let f of forms" [value]="f">{{f}}</md-option>
+                </md-optgroup>
+
+              </md-select>
+            </td>
+
+            <td class="td-padding">
+              <md-select name="reportSelect" id="reportSelect" [(ngModel)]="selectedReport" (change)="reportChange()"
+                         [style.width]="'100%'" placeholder="Reports: ">
+                <md-optgroup>
+                  <md-option>Please select</md-option>
+                  <md-option *ngFor="let r of reports" [value]="r">{{r}}</md-option>
+                </md-optgroup>
+
+              </md-select>
+            </td>
+          </tr>
+        </table>
+      </form>
+
+    </md-card-content>
+    <md-card-actions>
+
+      <button md-raised-button color="primary" (click)="saveOptionsJson()" [disabled]="!showActions"> Save Responses</button>
+      <button md-raised-button color="primary" (click)="loadOptions()" [disabled]="!showActions"> Load Options</button>
+
+    </md-card-actions>
+
+    <md-card-footer>
+
+    </md-card-footer>
+  </md-card>
+</div>
+<p></p>
+<options-view></options-view>

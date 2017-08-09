@@ -12,7 +12,7 @@ import {
 import {Headers, Http, Response} from "@angular/http";
 import {Observable} from "rxjs/Observable";
 import "rxjs/Rx";
-
+import {environment} from "../../environments/environment"
 
 export interface IDynamicComponent {
   entity: any;
@@ -21,21 +21,29 @@ export interface IDynamicComponent {
 
 @Injectable()
 export class ManualEntryService {
-  constructor(@Inject(Compiler) protected compiler: Compiler, private http: Http) {
+  private apiHostName: string;
 
+  constructor(@Inject(Compiler) protected compiler: Compiler, private http: Http) {
+    this.apiHostName = environment.apiHostName;
   }
+
 
   private factoryCache: { [templateKey: string]: ComponentFactory<IDynamicComponent> } = {};
 
   createComponentModule(template: string, css: string, js: string, responses: string, settings: string) {
-    let factory = this.factoryCache[template];
-    console.log("Factory loaded from cache" + factory);
-    if (factory) {
-      console.log("Factory loaded from cache");
-      return new Promise((resolve) => {
-        resolve(factory);
-      })
-    }
+    /**
+     * We should not load cached factory for manual entry. It won't run some required functions. So commenting below
+     * factory loading from cache.
+     * @type {ComponentFactory<IDynamicComponent>}
+     */
+      // let factory = this.factoryCache[template];
+      // console.log("Factory loaded from cache" + factory);
+      // if (factory) {
+      //   console.log("Factory loaded from cache");
+      //   return new Promise((resolve) => {
+      //     resolve(factory);
+      //   })
+      // }
 
     let component = this.createComponent(template, css, js, responses, settings);
     let module = this.createModule(component);
@@ -45,6 +53,10 @@ export class ManualEntryService {
         .then((moduleWithFactories: ModuleWithComponentFactories<any>) => {
           console.log("Module with Components");
           let factory = moduleWithFactories.componentFactories.find((x: any) => x.selector === 't1');
+          /**
+           * See above comment about factory loading from cache.
+           * @type {ComponentFactory<any>}
+           */
           this.factoryCache[template] = factory;
           resolve(factory);
 
@@ -69,9 +81,6 @@ export class ManualEntryService {
       }
 
       ngOnInit() {
-        /**
-         *
-         */
 
       }
 
@@ -110,8 +119,6 @@ export class ManualEntryService {
         node.innerHTML = "<button id ='buttonItemResponseButton' name = 'buttonItemResponseButton' onclick='saveToJson();'> Save To Json </button>"
 
         document.getElementById('container').appendChild(node);
-
-
       }
 
       private createDisableDivElement() {
@@ -140,39 +147,26 @@ export class ManualEntryService {
     return RuntimeModule;
   }
 
-  // public fetchManualEntry(productCode: string): Observable<Response> {
-  //     return this.http.get(`http://localhost:9001/bundle/itementry/html/${productCode}`);
-  // }
-  //
-  // public fetchManualEntryJS(productCode: string): Observable<Response> {
-  //     return this.http.get(`http://localhost:9001/bundle/itementry/js/${productCode}`);
-  // }
-  //
-  // public fetchManualEntryCSS(productCode: string): Observable<Response> {
-  //     return this.http.get(`http://localhost:9001/bundle/itementry/css/${productCode}`);
-  // }
-
-
   public fetchManualEntry(productCode: string, formName: string): Observable<Response> {
-    return this.http.get(`http://localhost:9001/bundle/product/manualentry/html/${productCode}/${formName}`);
+    return this.http.get(`${this.apiHostName}/bundle/product/manualentry/html/${productCode}/${formName}`);
   }
 
   public fetchManualEntryJS(productCode: string, formName: string): Observable<Response> {
-    return this.http.get(`http://localhost:9001/bundle/product/manualentry/js/${productCode}/${formName}`);
+    return this.http.get(`${this.apiHostName}/bundle/product/manualentry/js/${productCode}/${formName}`);
   }
 
   public fetchManualEntryCSS(productCode: string, formName: string): Observable<Response> {
-    return this.http.get(`http://localhost:9001/bundle/product/manualentry/css/${productCode}/${formName}`);
+    return this.http.get(`${this.apiHostName}/bundle/product/manualentry/css/${productCode}/${formName}`);
   }
 
   public fetchManualEntryResponse(productCode: string, examineeId: string): Observable<Response> {
-    return this.http.get(`http://localhost:9001/bundle/product/item-responses/${productCode}/${examineeId}`);
+    return this.http.get(`${this.apiHostName}/bundle/product/item-responses/${productCode}/${examineeId}`);
   }
 
   public saveResponses(response: any): Observable<Response> {
     let headers = new Headers();
     headers.append("Content-Type", "application/json");
-    return this.http.put("http://localhost:9001/bundle/product/item-responses/save",
+    return this.http.put(`${this.apiHostName}/bundle/product/item-responses/save`,
       JSON.stringify(response), {headers: headers});
   }
 

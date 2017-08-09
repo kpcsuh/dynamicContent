@@ -1,0 +1,16 @@
+.title-align {
+  text-align: center;
+}
+
+.tool-bar-align {
+  flex: 1 1 auto;
+}
+
+.td-padding {
+  padding: 0.3em;
+  width: 250px;
+}
+
+.toolbar-padding {
+  padding-left: 50px;
+}

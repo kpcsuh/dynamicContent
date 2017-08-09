@@ -4,6 +4,12 @@
 
 
 <md-card class="settings-card settings-basic">
+
+  <md-chip-list>
+      <md-chip *ngIf="showProductChip" color="primary" selected="true">{{productSelected}} &#10142; {{formSelected}}</md-chip>
+  </md-chip-list>
+
+<br>
   <div #itemEntry>
 
   </div>

@@ -34,6 +34,7 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
   private productSelected: string = "";
   private formSelected: string;
   private platformValue: PlatformValues = new PlatformValues();
+  private showProductChip:boolean = false;
 
 
   private examineeId: string = "1234";
@@ -74,6 +75,7 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
    * @param productCode
    */
   private createDynamicManualEntry(productCode: string, formName: string) {
+    this.showProductChip = true;
     this.manualEntryService.fetchManualEntry(productCode, formName).subscribe(respHtml => {
       this.manualEntry = respHtml.text();
 
@@ -160,6 +162,7 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
   }
 
   private destroyManualEntryModule() {
+    this.showProductChip = false;
     this.cleanUpComponentRef();
     this.vcr.clear();
   }
@@ -176,10 +179,14 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
   }
 
   private consumePlatformValues(object: PlatformValues) {
+    console.log("consumePlatformValues:");
+    console.log(object);
     this.platformValue = object;
   }
 
   private createSettingsScript(json: string): string {
+    console.log('createSettingsScript: ');
+    console.log("onPlatformChange(" + json + ")");
     return "onPlatformChange(" + json + ")";
   }
 

@@ -2,6 +2,7 @@
   <md-toolbar class="tool-bar-align" color="secondary">Manual Entry Item Responses</md-toolbar>
   <md-card class="settings-card settings-basic">
     <p></p>
+
     <md-card-content>
       <form ng-form="settingsForm">
 
@@ -219,32 +220,25 @@
         </div>
 
 
-        <table>
-          <tr>
+        <md-card-actions>
+          <button md-button color="secondary" md-raised-button (click)="validate()"
+                  [disabled]="!enableManualEntryRelatedButtons"> Disable Items
+          </button>
 
-            <td>
-              <button md-button color="secondary" md-raised-button (click)="validate()"
-                      [disabled]="!enableManualEntryRelatedButtons"> Disable Items
-              </button>
-            </td>
-            <td>
-              <button md-button color="secondary" md-raised-button (click)="enable()"
-                      [disabled]="!enableManualEntryRelatedButtons"> Enable Items
-              </button>
-            </td>
-            <td>
-              <button md-button md-raised-button id="saveButton" name="saveButton"
-                      [disabled]="!enableManualEntryRelatedButtons"
-                      md-raised-button (click)="sendSaveResponseEvent()"> Save Responses
-              </button>
-            </td>
-            <td>
-              <button md-button md-raised-button color="primary" [disabled]="!enableLoadManualEntryButton"
-                      (click)="loadManualEntryForm()"> Load Manual Entry
-              </button>
-            </td>
-          </tr>
-        </table>
+          <button md-button color="secondary" md-raised-button (click)="enable()"
+                  [disabled]="!enableManualEntryRelatedButtons"> Enable Items
+          </button>
+
+          <button md-button md-raised-button id="saveButton" name="saveButton"
+                  [disabled]="!enableManualEntryRelatedButtons"
+                  md-raised-button (click)="sendSaveResponseEvent()"> Save Responses
+          </button>
+
+          <button md-button md-raised-button color="primary" [disabled]="!enableLoadManualEntryButton"
+                  (click)="loadManualEntryForm()"> Load Manual Entry
+          </button>
+
+        </md-card-actions>
         <div>
         </div>
 
