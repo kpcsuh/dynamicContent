@@ -1,10 +1,10 @@
-import {Component} from "@angular/core";
-import {Router} from "@angular/router"
+import {Component} from '@angular/core';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'home',
   templateUrl: './home.component.html',
-  styleUrls: ["./home.component.css"]
+  styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
   constructor(private router: Router) {
@@ -13,6 +13,6 @@ export class HomeComponent {
 
 
   logout() {
-    this.router.navigate(["login"]);
+    this.router.navigate(['login']);
   }
 }

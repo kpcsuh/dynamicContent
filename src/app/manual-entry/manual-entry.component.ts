@@ -10,9 +10,9 @@ import {
   SimpleChange,
   ViewChild,
   ViewContainerRef
-} from "@angular/core";
-import {IDynamicComponent, ManualEntryService} from "./manual-entry.service";
-import {PlatformValues} from "./platform/PlatformValues";
+} from '@angular/core';
+import {IDynamicComponent, ManualEntryService} from './manual-entry.service';
+import {PlatformValues} from './platform/PlatformValues';
 
 @Component({
   selector: 'manaul-entry',
@@ -22,7 +22,7 @@ import {PlatformValues} from "./platform/PlatformValues";
 export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, OnChanges, OnDestroy, OnInit {
 
 
-  @ViewChild("itemEntry", {read: ViewContainerRef})
+  @ViewChild('itemEntry', {read: ViewContainerRef})
   private vcr: ViewContainerRef;
 
   protected componentRef: ComponentRef<any>;
@@ -31,13 +31,13 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
   private manulaEntryCss: string = null;
   private manualEntryJs: string = null;
   private manualEntryResponses: string = null;
-  private productSelected: string = "";
-  private formSelected: string;
+  public productSelected = '';
+  public formSelected: string;
   private platformValue: PlatformValues = new PlatformValues();
-  private showProductChip:boolean = false;
+  public showProductChip = false;
 
 
-  private examineeId: string = "1234";
+  private examineeId = '1234';
 
 
   // until ngAfterViewInit, we cannot start (firstly) to process manual-entry stuff
@@ -55,10 +55,11 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
    */
   createManualEntryModule(html: string, css: string, js: string, response: string, settings: string) {
 
-    let componet = this.manualEntryService.createComponentModule(html, css, js, response, settings).then((factory: ComponentFactory<IDynamicComponent>) => {
-      let componentRef = this.vcr.createComponent(factory);
-      let comp = componentRef.instance;
-    });
+    const componet = this.manualEntryService.createComponentModule(html, css, js, response, settings)
+      .then((factory: ComponentFactory<IDynamicComponent>) => {
+        const componentRef = this.vcr.createComponent(factory);
+        const comp = componentRef.instance;
+      });
   }
 
 
@@ -99,7 +100,7 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
   }
 
   ngAfterViewChecked() {
-    //no code yet
+    // no code yet
   }
 
   public ngOnChanges(changes: { [key: string]: SimpleChange }): void {
@@ -122,19 +123,19 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
   }
 
   public saveResponse(event: any) {
-    console.log("Response saved");
+    console.log('Response saved');
     document.getElementById('buttonItemResponseButton').click();
 
-    var object = {
-      "id": null,
-      "acronym": this.productSelected,
-      "examineeId": this.examineeId,
-      "responses": document.getElementById('formDiv').innerHTML
-    }
+    const object = {
+      'id': null,
+      'acronym': this.productSelected,
+      'examineeId': this.examineeId,
+      'responses': document.getElementById('formDiv').innerHTML
+    };
 
     this.manualEntryService.saveResponses(object).subscribe(resp => {
-      console.log("Save Response :" + resp);
-    })
+      console.log('Save Response :' + resp);
+    });
 
 
     //  this.componentRef.instance.
@@ -144,31 +145,31 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
   //     this.componentRef.instance.
   // }
 
-  productChange(productId: string) {
+  public productChange(productId: string) {
 
-    if (this.productSelected == "Plese select") {
+    if (this.productSelected === 'Plese select') {
       return;
     }
     this.productSelected = productId;
     this.destroyManualEntryModule();
-    console.log("selected product id : " + this.productSelected);
+    console.log('selected product id : ' + this.productSelected);
   }
 
-  formChange(formId: string) {
+  public formChange(formId: string) {
     this.formSelected = formId;
 
     this.destroyManualEntryModule();
-    console.log("selected form value : " + this.formSelected);
+    console.log('selected form value : ' + this.formSelected);
   }
 
-  private destroyManualEntryModule() {
+  public destroyManualEntryModule() {
     this.showProductChip = false;
     this.cleanUpComponentRef();
     this.vcr.clear();
   }
 
-  private loadManualEntryForm(value: boolean) {
-    console.log("Logged value :" + value);
+  public loadManualEntryForm(value: boolean) {
+    console.log('Logged value :' + value);
     /** destroy existing component **/
     this.destroyManualEntryModule();
 
@@ -178,16 +179,16 @@ export class ManualEntryComponent implements AfterViewInit, AfterViewChecked, On
     this.createDynamicManualEntry(this.productSelected, this.formSelected);
   }
 
-  private consumePlatformValues(object: PlatformValues) {
-    console.log("consumePlatformValues:");
+  public consumePlatformValues(object: PlatformValues) {
+    console.log('consumePlatformValues:');
     console.log(object);
     this.platformValue = object;
   }
 
-  private createSettingsScript(json: string): string {
+  public createSettingsScript(json: string): string {
     console.log('createSettingsScript: ');
-    console.log("onPlatformChange(" + json + ")");
-    return "onPlatformChange(" + json + ")";
+    console.log('onPlatformChange(' + json + ')');
+    return 'onPlatformChange(' + json + ')';
   }
 
 }

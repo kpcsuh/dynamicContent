@@ -1,26 +1,26 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {PlatformValues} from "../platform/PlatformValues";
-import {SettingsService} from "./settings.service"
+import {PlatformValues} from '../platform/PlatformValues';
+import {SettingsService} from './settings.service';
 
 @Component({
-  selector: "settings",
-  templateUrl: "./settings.component.html",
-  styleUrls: ["./settings.component.css"]
+  selector: 'settings',
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.css']
 })
 export class SettingsComponent implements OnInit {
 
-  selectedValue: string;
-  private productSelected: string;
-  private formSelected: string;
+  public selectedValue: string;
+  public productSelected: string;
+  public formSelected: string;
 
-  private examineeId: string = "1234";
+  private examineeId = '1234';
 
-  private platformValue: PlatformValues = new PlatformValues();
-  private showSettings = false;
-  private forms: string;
-  private products;
-  private enableLoadManualEntryButton: boolean;
-  private enableManualEntryRelatedButtons: boolean;
+  public platformValue: PlatformValues = new PlatformValues();
+  public showSettings = false;
+  public forms: string;
+  public products;
+  public enableLoadManualEntryButton: boolean;
+  public enableManualEntryRelatedButtons: boolean;
 
 
   @Output() productChangeEvent: EventEmitter<string> = new EventEmitter<string>();
@@ -42,17 +42,17 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  private validate() {
+  public validate() {
     document.getElementById('buttonDisableButton').click();
   }
 
-  private enable() {
+  public enable() {
     document.getElementById('buttonEnableButton').click();
   }
 
-  productChange() {
+  public productChange() {
 
-    if (this.productSelected == "Plese select") {
+    if (this.productSelected == 'Plese select') {
       return;
     }
     this.manageEnableButtons(false);
@@ -63,8 +63,7 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  formChange() {
-    this.formSelected;
+  public formChange() {
     // this.destroyManualEntryModule();
     this.settingsService.getPlatformValues(this.formSelected, this.examineeId).subscribe(map => {
       this.platformValue = map.json();
@@ -76,20 +75,20 @@ export class SettingsComponent implements OnInit {
       this.manageEnableButtons(true);
     });
 
-    console.log("selected form value : " + this.formSelected);
+    console.log('selected form value : ' + this.formSelected);
   }
 
-  private loadManualEntryForm() {
+  public loadManualEntryForm() {
     this.manualEntryLoadEvent.emit(true);
     this.enableManualEntryRelatedButtons = true;
 
   }
 
-  private sendSaveResponseEvent() {
+  public sendSaveResponseEvent() {
     this.saveResponseEvent.emit(true);
   }
 
-  private manageEnableButtons(flag: boolean) {
+  public manageEnableButtons(flag: boolean) {
     if (!flag) {
       this.enableLoadManualEntryButton = flag;
       this.enableManualEntryRelatedButtons = flag;

@@ -1,17 +1,17 @@
-import {Component, OnInit} from "@angular/core";
-import {LoginService} from "./login.service";
-import {Router} from "@angular/router"
+import {Component, OnInit} from '@angular/core';
+import {LoginService} from './login.service';
+import {Router} from '@angular/router';
 
 
 @Component({
-  selector: "login",
-  templateUrl: "./login.component.html",
-  styleUrls: ["./login.component.css"]
+  selector: 'login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  private username: string;
-  private password: string;
-  private errorMessage: string;
+  public username: string;
+  public password: string;
+  public errorMessage: string;
 
   constructor(private loginService: LoginService, private router: Router) {
 
@@ -23,11 +23,11 @@ export class LoginComponent implements OnInit {
 
   login() {
 
-    let valid = this.loginService.validateCredentials(this.username, this.password);
+    const valid = this.loginService.validateCredentials(this.username, this.password);
     if (valid) {
-      this.router.navigate(["home"]);
+      this.router.navigate(['home']);
     } else {
-      this.errorMessage = "Invalid username and password";
+      this.errorMessage = 'Invalid username and password';
     }
 
 
