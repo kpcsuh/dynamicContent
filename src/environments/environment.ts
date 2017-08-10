@@ -6,4 +6,5 @@
 export const environment = {
     production: false,
     apiHostName: 'http://localhost:9001'
+  // apiHostName: 'http://18.220.98.220:8080/'
 };
